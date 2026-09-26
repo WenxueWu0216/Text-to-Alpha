@@ -1,0 +1,89 @@
+# ---- Universe ----
+# Large, liquid names with dense news coverage.
+# Aliases (split by "|") are used to mask company identity in LLM prompts,
+# which reduces look-ahead bias from the LLM's pretraining memory.
+universe:
+  AAPL: Apple
+  MSFT: Microsoft
+  AMZN: Amazon
+  GOOGL: Alphabet|Google
+  META: Meta Platforms|Facebook
+  NVDA: Nvidia
+  TSLA: Tesla
+  NFLX: Netflix
+  AMD: Advanced Micro Devices|AMD
+  INTC: Intel
+  CSCO: Cisco
+  ORCL: Oracle
+  CRM: Salesforce
+  ADBE: Adobe
+  QCOM: Qualcomm
+  AVGO: Broadcom
+  TXN: Texas Instruments
+  IBM: International Business Machines|IBM
+  PYPL: PayPal
+  UBER: Uber
+  JPM: JPMorgan|JP Morgan
+  BAC: Bank of America
+  GS: Goldman Sachs
+  MS: Morgan Stanley
+  WFC: Wells Fargo
+  C: Citigroup|Citi
+  V: Visa
+  MA: Mastercard
+  JNJ: Johnson & Johnson
+  PFE: Pfizer
+  MRK: Merck
+  ABBV: AbbVie
+  UNH: UnitedHealth
+  WMT: Walmart
+  COST: Costco
+  HD: Home Depot
+  NKE: Nike
+  SBUX: Starbucks
+  DIS: Disney
+  BA: Boeing
+  XOM: ExxonMobil|Exxon
+  CVX: Chevron
+  KO: Coca-Cola
+  PEP: PepsiCo|Pepsi
+  MCD: McDonald's
+
+dates:
+  start: "2018-01-01"
+  end: "2023-12-31"
+
+paths:
+  raw_news_csv: data/raw/nasdaq_exteral_data.csv   # FNSPID file (typo is upstream)
+  news: data/processed/news.parquet
+  prices: data/processed/prices.parquet
+  panel: data/processed/panel.parquet               # one row per (date, ticker)
+  events: data/processed/events.parquet             # one row per news item, aligned
+  signals_dir: data/signals
+  llm_cache: data/cache/llm_cache.sqlite
+
+labels:
+  horizon_days: 1        # return from open(D) to open(D+h)
+  top_quantile: 0.3      # cross-sectional top 30% -> +1, bottom 30% -> -1, else 0
+
+split:                   # chronological, purged
+  train_end: "2021-12-31"
+  val_end: "2022-12-31"  # test = after val_end; do not touch until the very end
+  embargo_days: 5        # gap between splits, must be >= horizon_days
+
+eval:
+  min_names_per_day: 5   # skip days with too few names for a cross-sectional IC
+  cost_bps_round_trip: 10
+
+finbert:
+  model: ProsusAI/finbert
+  batch_size: 64
+  max_length: 64
+
+llm:
+  model: claude-haiku-4-5-20251001
+  max_concurrency: 8
+  mask_entities: true
+  sample_size: 3000      # cap API spend per split; null = all
+  max_news_per_stock_day: 2
+  seed: 0
