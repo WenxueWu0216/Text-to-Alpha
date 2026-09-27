@@ -19,7 +19,8 @@ def report(stock_day: pd.DataFrame, cfg: dict, name: str, splits=("train", "val"
         if len(part):
             rows[s] = evaluate(part, min_names=cfg["eval"]["min_names_per_day"],
                                cost_bps=cfg["eval"]["cost_bps_round_trip"],
-                               horizon=cfg["labels"]["horizon_days"])
+                               horizon=cfg["labels"]["horizon_days"],
+                               top_q=cfg["labels"]["top_quantile"])
     table = pd.DataFrame(rows).T
     print(f"\n=== {name} ===\n{table.round(4).to_string()}")
     if out_dir is not None:

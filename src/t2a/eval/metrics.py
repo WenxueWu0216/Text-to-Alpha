@@ -63,12 +63,25 @@ def sharpe(daily: pd.Series, horizon: int = 1) -> float:
     return daily.mean() / daily.std(ddof=1) * np.sqrt(TRADING_DAYS / horizon)
 
 
-def classification_metrics(df: pd.DataFrame, neutral_band: float = 0.0) -> dict:
-    """How well does the signal's SIGN match the realised label?
+def classification_metrics(df: pd.DataFrame, top_q: float = 0.3) -> dict:
+    """How well does the signal's predicted class match the realised label?
+
+    Predictions are made the SAME way labels are (see build_panel): per date, the
+    symmetric percentile (rank - 1) / (n - 1) of the signal decides +1 / -1 / 0.
+    A raw sign() rule would never predict 0 for a continuous signal (e.g. FinBERT),
+    while an LLM signal can output exactly 0 -- comparing the two on macro-F1 would
+    be unfair unless both go through the same percentile-based decision rule.
 
     directional_acc ignores label==0 (middle 40%): those moves are mostly noise.
     """
-    pred = np.where(df["signal"] > neutral_band, 1, np.where(df["signal"] < -neutral_band, -1, 0))
+    g = df.groupby("date")["signal"]
+    n = g.transform("size")
+    rank = g.rank(method="average")
+    denom = (n - 1).where(n > 1, 1)  # placeholder to avoid /0; overridden below
+    pct = (rank - 1) / denom
+    pred = np.select([pct >= 1 - top_q, pct <= top_q], [1, -1], default=0)
+    pred = np.where(n > 1, pred, 0)  # a single name has no cross-section to rank against
+
     mask = (df["label"] != 0) & (pred != 0)
     return {
         "macro_f1": f1_score(df["label"], pred, average="macro"),
@@ -77,7 +90,8 @@ def classification_metrics(df: pd.DataFrame, neutral_band: float = 0.0) -> dict:
     }
 
 
-def evaluate(df: pd.DataFrame, min_names: int = 5, cost_bps: float = 10.0, horizon: int = 1) -> dict:
+def evaluate(df: pd.DataFrame, min_names: int = 5, cost_bps: float = 10.0, horizon: int = 1,
+             top_q: float = 0.3) -> dict:
     ic = daily_ic(df, min_names=min_names)
     ls = long_short_returns(df, min_names=min_names, cost_bps=cost_bps)
     out = ic_summary(ic)
@@ -86,6 +100,6 @@ def evaluate(df: pd.DataFrame, min_names: int = 5, cost_bps: float = 10.0, horiz
         "ls_sharpe_gross": sharpe(ls + cost_bps / 1e4, horizon),
         "ls_ann_return_net": ls.mean() * TRADING_DAYS / horizon,
     })
-    out.update(classification_metrics(df))
+    out.update(classification_metrics(df, top_q=top_q))
     out["n_obs"] = len(df)
     return out

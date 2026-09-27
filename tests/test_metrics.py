@@ -14,8 +14,11 @@ def make_panel(signal_fn, n_days=50, n_names=10, seed=0):
             rows.append({"date": d, "ticker": f"T{i}", "fwd_ret": ret[i],
                          "excess_ret": ret[i] - ret.mean(), "signal": signal_fn(ret[i], rng)})
     df = pd.DataFrame(rows)
-    q = df.groupby("date")["excess_ret"].rank(pct=True)
-    df["label"] = np.select([q >= 0.7, q <= 0.3], [1, -1], 0)
+    # Symmetric percentile (rank - 1) / (n - 1), same rule build_panel() uses for labels
+    # and classification_metrics() now uses for predictions.
+    g = df.groupby("date")["excess_ret"]
+    pct = (g.rank() - 1) / (g.transform("size") - 1)
+    df["label"] = np.select([pct >= 0.7, pct <= 0.3], [1, -1], default=0)
     return df
 
 
@@ -45,6 +48,13 @@ def test_days_with_too_few_names_are_skipped():
 def test_evaluate_runs():
     out = evaluate(make_panel(lambda r, rng: r + rng.normal(0, 0.02)))
     assert out["ic_mean"] > 0.3 and out["directional_acc"] > 0.6
+
+
+def test_perfect_signal_gives_macro_f1_one():
+    # signal == fwd_ret is a monotonic transform of excess_ret within each day, so ranking
+    # the signal reproduces the exact same buckets used to build the label.
+    out = evaluate(make_panel(lambda r, rng: r))
+    assert out["macro_f1"] == 1.0
 
 
 def test_dedup_keeps_earliest_within_window_only():
