@@ -1,6 +1,25 @@
-data/
+# Data, caches and artifacts live outside git (licensing, size, secrets).
+# Anchored with a leading slash so src/t2a/data/ (code) is NOT ignored.
+/data/
+/mlruns/
+/models/
+*.sqlite
+*.sqlite3
+*.parquet
+*.safetensors
+*.bin
+*.pt
+*.ckpt
+
+# Secrets
 .env
+.env.*
+!.env.example
+
+# Python / tooling
 __pycache__/
 *.pyc
 .pytest_cache/
+.ruff_cache/
+.venv/
 .DS_Store
