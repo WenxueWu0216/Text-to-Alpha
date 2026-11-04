@@ -8,6 +8,7 @@ import pandas as pd
 from dotenv import load_dotenv
 
 from t2a.config import load_config
+from t2a.data.io import load_events
 from t2a.data.news import mask_entities
 from t2a.eval.report import report
 from t2a.signals.aggregate import to_stock_day
@@ -19,7 +20,7 @@ def main():
     load_dotenv()  # ANTHROPIC_API_KEY from .env
     cfg = load_config()
     P, L = cfg["paths"], cfg["llm"]
-    events = pd.read_parquet(P["events"])
+    events = load_events(cfg)
 
     # train sample -> future distillation labels; val sample -> benchmark. Never test.
     capped = cap_per_stock_day(events, L["max_news_per_stock_day"], L["seed"])
@@ -50,13 +51,13 @@ def main():
     sub[[c for c in keep if c in sub]].to_parquet(out / "llm_zeroshot_events.parquet")
 
     ok = sub.dropna(subset=["llm_signal"])
-    report(to_stock_day(ok, "llm_signal"), cfg, "llm_zeroshot", out_dir=out)
+    report(to_stock_day(ok, "llm_signal"), cfg, "llm_zeroshot")
 
     # Fair comparison: FinBERT on exactly the same articles.
     fb_path = out / "finbert_events.parquet"
     if fb_path.exists():
         fb = ok.merge(pd.read_parquet(fb_path), on="news_id")
-        report(to_stock_day(fb, "finbert"), cfg, "finbert_same_subset", out_dir=out)
+        report(to_stock_day(fb, "finbert"), cfg, "finbert_same_subset")
 
 
 if __name__ == "__main__":
