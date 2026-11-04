@@ -22,6 +22,7 @@ import hashlib
 import json
 import sqlite3
 import time
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -189,7 +190,12 @@ class ClaudeScorer:
         async with sem:
             t0 = time.perf_counter()
             try:
-                resp = await client.messages.create(**request_params(self.model, system, message))
+                params = request_params(self.model, system, message)
+                # anthropic>=1.x removed sampling kwargs from the typed signature; send the
+                # same value in the body so sync and batch requests stay identical.
+                resp = await client.messages.create(
+                    **{k: v for k, v in params.items() if k != "temperature"},
+                    extra_body={"temperature": params["temperature"]})
             except Exception as e:  # one bad request must not kill the run; it is counted
                 return {"status": "api_error", "error": repr(e)[:300]}
             latency = time.perf_counter() - t0
@@ -203,14 +209,17 @@ class ClaudeScorer:
 
         client = AsyncAnthropic(max_retries=6)
         sem = asyncio.Semaphore(self.max_concurrency)
+        out = []
         for i in range(0, len(items), 100):  # commit every 100 so a crash loses little work
-            await asyncio.gather(*[self._one(client, sem, k, system, m) for k, m in items[i:i + 100]])
+            out += await asyncio.gather(*[self._one(client, sem, k, system, m) for k, m in items[i:i + 100]])
             self.cache.commit()
             print(f"  sync {min(i + 100, len(items))}/{len(items)}")
+        return out
 
-    def score_sync(self, system: str, items: list[tuple[str, str]]) -> None:
-        if items:
-            asyncio.run(self._run_sync(system, items))
+    def score_sync(self, system: str, items: list[tuple[str, str]]) -> list[dict]:
+        """Returns one record per item, including uncached failures, so callers can stop
+        before spending more when the API is rejecting requests."""
+        return asyncio.run(self._run_sync(system, items)) if items else []
 
     # ---- batch transport (cost) -------------------------------------------------------
     def _pending(self) -> list[str]:
@@ -239,6 +248,7 @@ class ClaudeScorer:
 
         client = Anthropic()
         n = 0
+        errors: Counter = Counter()
         for bid in self._pending():
             while (b := client.messages.batches.retrieve(bid)).processing_status != "ended":
                 c = b.request_counts
@@ -251,9 +261,14 @@ class ClaudeScorer:
                     rec.update(transport="batch", batch_id=bid)
                     self.cache.put(r.custom_id, rec)
                     n += 1
-                # errored / expired requests stay uncached and are retried on the next run
+                elif r.result.type == "errored":  # stays uncached, retried on the next run
+                    errors[r.result.error.error.message[:120]] += 1
+                else:  # expired / canceled
+                    errors[r.result.type] += 1
             self.cache.commit()
             self._set_pending([p for p in self._pending() if p != bid])
+        for msg, cnt in errors.most_common(3):
+            print(f"  batch: {cnt} requests failed: {msg}")
         return n
 
 

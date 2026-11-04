@@ -13,7 +13,8 @@ def status_summary(df: pd.DataFrame) -> dict:
             "n_invalid_schema": counts.get("invalid", 0),
             "n_no_tool_call": counts.get("no_tool_call", 0),
             "n_api_error": counts.get("api_error", 0) + counts.get("missing", 0),
-            "n_truncated_max_tokens": int((df.get("stop_reason") == "max_tokens").sum())}
+            "n_truncated_max_tokens": int((df["stop_reason"] == "max_tokens").sum())
+            if "stop_reason" in df else 0}
 
 
 def by_event_type(df: pd.DataFrame, signal: str = "llm_signal", min_n: int = 30) -> dict:

@@ -123,7 +123,11 @@ def main():
             return
 
         sync_keys = list(rng.choice(todo, size=n_sync, replace=False)) if n_sync else []
-        scorer.score_sync(system, [(k, msg_of[k]) for k in sync_keys])
+        sync_out = scorer.score_sync(system, [(k, msg_of[k]) for k in sync_keys])
+        failed = [r for r in sync_out if r.get("status") == "api_error"]
+        if sync_out and len(failed) > len(sync_out) / 2:
+            sys.exit(f"STOP: {len(failed)}/{len(sync_out)} sync calls failed, not submitting the batch. "
+                     f"First error: {failed[0]['error']}")
         sync_recs = [r for r in scorer.cache.get_many(sync_keys).values()]
         ledger.record(f"{name}:sync", spend_of(sync_recs, prices), calls=len(sync_recs),
                       prompt_version=PROMPT_VERSION)

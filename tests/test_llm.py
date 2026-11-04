@@ -108,3 +108,9 @@ def test_fewshot_examples_are_train_only_and_balanced():
     assert sorted(e["label"] for e in ex) == [-1, -1, 0, 1, 1]
     with pytest.raises(ValueError):
         select_fewshot_examples(pd.concat([_train(), _train("val")]), {1: 1}, seed=0)
+
+
+def test_status_summary_survives_all_missing():
+    from t2a.eval.llm_analysis import status_summary
+    s = status_summary(records_to_frame([None, None]))
+    assert s["n_api_error"] == 2 and s["valid_share"] == 0
