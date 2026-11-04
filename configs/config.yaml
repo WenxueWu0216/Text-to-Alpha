@@ -62,6 +62,7 @@ paths:
   signals_dir: data/signals
   llm_cache: data/cache/llm_cache.sqlite
   vix: data/processed/vix.parquet
+  lexicon_dir: data/lexicon
   data_quality: data/processed/data_quality_raw.json  # written by step 1 from the raw CSV
 
 labels:
