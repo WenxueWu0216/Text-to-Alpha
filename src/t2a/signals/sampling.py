@@ -30,3 +30,35 @@ def sample_by_day(events: pd.DataFrame, target: int | None, seed: int) -> pd.Dat
     counts = events.groupby("trade_date").size().reindex(days)
     keep = counts.index[counts.cumsum() <= target]
     return events[events["trade_date"].isin(keep)]
+
+
+def sample_days(events: pd.DataFrame, n_days: int | None, seed: int) -> pd.DataFrame:
+    """Keep all articles on n_days randomly chosen trading days (whole cross-sections)."""
+    days = np.array(sorted(events["trade_date"].unique()))
+    if n_days is None or n_days >= len(days):
+        return events
+    keep = np.random.default_rng(seed).choice(days, size=n_days, replace=False)
+    return events[events["trade_date"].isin(keep)]
+
+
+OUTCOME_TEXT = {1: "outperformed (top 30% of the universe)",
+                -1: "underperformed (bottom 30% of the universe)",
+                0: "in line (middle 40%)"}
+
+
+def select_fewshot_examples(train: pd.DataFrame, per_class: dict[int, int], seed: int) -> list[dict]:
+    """Few-shot demonstrations drawn ONLY from the train split.
+
+    Restricted to stock-days with exactly one article, so the realised move can be
+    attributed to that article rather than to a cluster of news.
+    """
+    if set(train["split"].unique()) != {"train"}:
+        raise ValueError("few-shot examples must come from the train split only")
+    solo = train.groupby(["trade_date", "ticker"])["news_id"].transform("size") == 1
+    pool = train[solo & (train["body"].str.len() > 200)]
+    picks = [pool[pool["label"] == c].sample(n, random_state=seed + i)
+             for i, (c, n) in enumerate(sorted(per_class.items()))]
+    ex = pd.concat(picks).sample(frac=1.0, random_state=seed)  # interleave classes
+    return [{"news_id": r.news_id, "ticker": r.ticker, "title": r.title, "body": r.body,
+             "label": int(r.label), "outcome": OUTCOME_TEXT[int(r.label)],
+             "trade_date": str(pd.Timestamp(r.trade_date).date())} for r in ex.itertuples()]
