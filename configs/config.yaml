@@ -61,6 +61,8 @@ paths:
   events: data/processed/events.parquet             # one row per news item, aligned
   signals_dir: data/signals
   llm_cache: data/cache/llm_cache.sqlite
+  vix: data/processed/vix.parquet
+  data_quality: data/processed/data_quality_raw.json  # written by step 1 from the raw CSV
 
 labels:
   horizon_days: 1        # return from open(D) to open(D+h)
@@ -73,7 +75,8 @@ split:                   # chronological, purged
 
 eval:
   min_names_per_day: 5   # skip days with too few names for a cross-sectional IC
-  cost_bps_round_trip: 10
+  cost_bps_per_side: 5        # headline cost, charged on actual turnover (5/side = 10 round trip)
+  cost_grid_bps_per_side: [0, 5, 10, 20]
 
 finbert:
   model: ProsusAI/finbert
