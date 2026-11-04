@@ -29,7 +29,8 @@ def git_commit() -> str:
 def git_dirty() -> bool:
     # Results written from a dirty tree are flagged, not blocked: the flag tells a reader
     # the commit hash alone may not reproduce the number.
-    return bool(_git("status", "--porcelain", "--untracked-files=no"))
+    # results/ is excluded: writing one result file must not mark the next one dirty.
+    return bool(_git("status", "--porcelain", "--untracked-files=no", "--", ".", ":(exclude)results"))
 
 
 def serializable_config(cfg: dict) -> dict:
