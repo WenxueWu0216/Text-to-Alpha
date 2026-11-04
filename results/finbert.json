@@ -1,7 +1,7 @@
 {
   "method": "finbert",
-  "created_utc": "2026-11-04T16:43:25+00:00",
-  "git_commit": "1f6d2610dfb599f699cddda84ff3399faf05f12b",
+  "created_utc": "2026-11-04T17:25:30+00:00",
+  "git_commit": "95a4b4f761c63b0b12a92ce052f6d2352683960c",
   "git_dirty": false,
   "metrics": {
     "train": {
@@ -226,7 +226,10 @@
     ]
   },
   "scored_text": "title",
-  "n_articles": 143287,
+  "n_articles_by_split": {
+    "train": 105738,
+    "val": 37549
+  },
   "cost_usd_per_1k_articles": 0.0,
   "cache": {
     "hits": 143287,
@@ -292,7 +295,9 @@
       "events": "data/processed/events.parquet",
       "signals_dir": "data/signals",
       "llm_cache": "data/cache/llm_cache.sqlite",
+      "llm_ledger": "data/cache/spend_ledger.jsonl",
       "vix": "data/processed/vix.parquet",
+      "lexicon_dir": "data/lexicon",
       "data_quality": "data/processed/data_quality_raw.json"
     },
     "labels": {
@@ -323,9 +328,40 @@
       "model": "claude-haiku-4-5-20251001",
       "max_concurrency": 8,
       "mask_entities": true,
-      "sample_size": 3000,
-      "max_news_per_stock_day": 2,
-      "seed": 0
+      "seed": 0,
+      "prices_per_mtok": {
+        "input": 1.0,
+        "output": 5.0
+      },
+      "est_output_tokens": 120,
+      "budget": {
+        "total_usd": 15.0,
+        "reserve_teacher_usd": 4.0
+      },
+      "variants": {
+        "zero_shot": {
+          "split": "val",
+          "max_news_per_stock_day": 1,
+          "n_days": null,
+          "n_examples": 0,
+          "latency_sample": 200,
+          "max_usd": 9.0,
+          "respect_teacher_reserve": true
+        },
+        "few_shot": {
+          "split": "val",
+          "max_news_per_stock_day": 1,
+          "n_days": null,
+          "examples_per_class": {
+            "1": 3,
+            "-1": 3,
+            "0": 2
+          },
+          "latency_sample": 100,
+          "max_usd": 5.0,
+          "respect_teacher_reserve": true
+        }
+      }
     },
     "tickers": [
       "AAPL",
