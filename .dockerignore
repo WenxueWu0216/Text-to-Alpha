@@ -1,0 +1,6 @@
+# Build context is the repo root; send only what the service image needs.
+*
+!service/app
+!service/requirements.txt
+!results/*.json
+**/__pycache__

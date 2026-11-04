@@ -11,3 +11,7 @@ python-dotenv>=1.0
 pytest>=8
 jsonschema>=4.20
 scipy>=1.11
+# model service (service/) and its tests
+fastapi>=0.110
+uvicorn>=0.29
+httpx>=0.27
