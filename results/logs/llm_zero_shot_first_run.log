@@ -1,0 +1,44 @@
+llm_zero_shot: 6,365 articles on 246 val days (<= 1/stock-day), 0 few-shot examples
+cache: 6 hits, 6,192 to score
+estimate: 6,192 calls (200 sync @ list price, 5,992 batch @ 50%), ~1050 input tokens/call (count_tokens on 25), 120 output tokens/call assumed
+          expected $5.27; worst case (every reply hits max_tokens=300) $8.15
+[pre-run] estimate $5.27 | spent so far $0.01 | run cap $9.00 | total cap $15.00 (reserve $4.00)
+  sync 100/200
+  sync 200/200
+re-estimate with measured usage (1046 in / 120 out per call): batch of 5,992 = $4.93
+[batch] estimate $4.93 | spent so far $0.34 | run cap $8.67 | total cap $15.00 (reserve $4.00)
+  submitted batch msgbatch_01XS4q2SEjw1VX7SPueYx1uG with 5992 requests
+{
+ "validity": {
+  "n": 6365,
+  "counts": {
+   "ok": 6365
+  },
+  "valid_share": 1.0,
+  "n_invalid_schema": 0,
+  "n_no_tool_call": 0,
+  "n_api_error": 0,
+  "n_truncated_max_tokens": 0
+ },
+ "cache": {
+  "hits": 6,
+  "misses": 6359,
+  "hit_rate": 0.0009426551453260016
+ },
+ "latency": {
+  "n_sync_calls": 208,
+  "p50_s": 1.9108849376207218,
+  "p95_s": 2.4608341669081706,
+  "mean_s": 1.9138448183086718
+ },
+ "cost_usd_per_1k_articles": {
+  "list_price": 1.6440733699921446,
+  "batch_price": 0.8220366849960723
+ }
+}
+
+=== llm_zero_shot ===
+     ic_mean  ic_tstat  n_days  ls_sharpe_gross  ls_sharpe_net  breakeven_cost_bps_per_side  turnover_mean  macro_f1   n_obs
+val   0.0272    1.9312   246.0            0.985        -0.9082                       2.6025         1.5519    0.3058  6365.0
+saved /Users/water/Downloads/text-to-alpha/results/llm_zero_shot.json
+exit 0

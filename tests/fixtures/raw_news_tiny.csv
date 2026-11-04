@@ -1,0 +1,9 @@
+Date,Article_title,Stock_symbol,Url,Publisher,Author,Article,Lsa_summary
+2022-03-01 00:00:00 UTC,Apple beats estimates,AAPL,u,p,a,Apple reported strong results.,s
+2022-03-01 14:00:00 UTC,Apple Beats Estimates!,AAPL,u,p2,a,Copy of the same story.,s
+2022-03-02 15:30:00 UTC,Microsoft cuts jobs,MSFT,u,p,a,Microsoft announced layoffs.,s
+not-a-date,Broken timestamp,MSFT,u,p,a,x,s
+2022-03-02 10:00:00 UTC,,AAPL,u,p,a,no title,s
+2022-03-02 10:00:00 UTC,Some small cap rallies,ZZZZ,u,p,a,x,s
+2022-03-02 10:00:00 UTC,Missing symbol,,u,p,a,x,s
+2015-01-01 00:00:00 UTC,Too old,AAPL,u,p,a,x,s

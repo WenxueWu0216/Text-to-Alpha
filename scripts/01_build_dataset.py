@@ -1,4 +1,5 @@
 """Step 1: raw news + prices -> aligned, labeled, split event table."""
+import json
 import sys
 from pathlib import Path
 
@@ -19,8 +20,12 @@ def main():
     start, end = cfg["dates"]["start"], cfg["dates"]["end"]
 
     print("[1/4] loading news ...")
-    news = load_news(P["raw_news_csv"], cfg["tickers"], start, end)
+    news, raw_stats = load_news(P["raw_news_csv"], cfg["tickers"], start, end)
     news.to_parquet(ensure_parent(P["news"]))
+    # Raw-file counts can only be measured here (the raw CSV is ~22 GB and not kept),
+    # so they are saved for the data quality report.
+    ensure_parent(P["data_quality"]).write_text(json.dumps(raw_stats, indent=2))
+    print("raw filtering counts:", json.dumps(raw_stats))
 
     print("[2/4] downloading prices ...")
     prices = download_prices(cfg["tickers"], start, end)

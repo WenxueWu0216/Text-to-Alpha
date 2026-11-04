@@ -61,6 +61,10 @@ paths:
   events: data/processed/events.parquet             # one row per news item, aligned
   signals_dir: data/signals
   llm_cache: data/cache/llm_cache.sqlite
+  llm_ledger: data/cache/spend_ledger.jsonl
+  vix: data/processed/vix.parquet
+  lexicon_dir: data/lexicon
+  data_quality: data/processed/data_quality_raw.json  # written by step 1 from the raw CSV
 
 labels:
   horizon_days: 1        # return from open(D) to open(D+h)
@@ -73,7 +77,8 @@ split:                   # chronological, purged
 
 eval:
   min_names_per_day: 5   # skip days with too few names for a cross-sectional IC
-  cost_bps_round_trip: 10
+  cost_bps_per_side: 5        # headline cost, charged on actual turnover (5/side = 10 round trip)
+  cost_grid_bps_per_side: [0, 5, 10, 20]
 
 finbert:
   model: ProsusAI/finbert
@@ -84,6 +89,27 @@ llm:
   model: claude-haiku-4-5-20251001
   max_concurrency: 8
   mask_entities: true
-  sample_size: 3000      # cap API spend per split; null = all
-  max_news_per_stock_day: 2
   seed: 0
+  # Anthropic first-party list price for Haiku 4.5 (USD per 1M tokens); Batches API = 50%.
+  prices_per_mtok: {input: 1.0, output: 5.0}
+  est_output_tokens: 120        # used for the pre-run estimate until real usage is measured
+  budget:
+    total_usd: 15.0             # hard cap across ALL API runs (ledger in data/cache/)
+    reserve_teacher_usd: 4.0    # held back for B1 teacher labels; benchmark runs may not use it
+  variants:
+    zero_shot:
+      split: val
+      max_news_per_stock_day: 1
+      n_days: null              # null = every val day
+      n_examples: 0
+      latency_sample: 200       # sync calls for real latency; the rest go through the Batches API
+      max_usd: 9.0
+      respect_teacher_reserve: true   # may NOT spend into the B1 reserve
+    few_shot:
+      split: val
+      max_news_per_stock_day: 1
+      n_days: null              # set after the zero-shot run, from the remaining budget
+      examples_per_class: {1: 3, -1: 3, 0: 2}
+      latency_sample: 100
+      max_usd: 5.0
+      respect_teacher_reserve: true

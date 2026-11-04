@@ -1,0 +1,559 @@
+{
+  "method": "finbert",
+  "created_utc": "2026-11-04T17:26:06+00:00",
+  "git_commit": "4c15fc9309e60df628dc77cff2a9a2d3ec37d784",
+  "git_dirty": false,
+  "metrics": {
+    "train": {
+      "ic_mean": 0.017068835988315906,
+      "ic_std": 0.22566287942899388,
+      "icir": 0.07563865191965129,
+      "ic_tstat": 2.4014527498029072,
+      "ic_hit_rate": 0.5416666666666666,
+      "n_days": 1008,
+      "ls_sharpe_gross": 0.9428495028837769,
+      "ls_sharpe_net": -1.3794101529084177,
+      "ls_ann_return_gross": 0.07634559594860477,
+      "ls_ann_return_net": -0.1117306945134449,
+      "cost_bps_per_side": 5,
+      "turnover_mean": 1.4926689863204956,
+      "holding_period_days": 1.3398817777633667,
+      "sharpe_by_cost_bps_per_side": {
+        "0": 0.9428495028837769,
+        "5": -1.3794101529084177,
+        "10": -3.699016631083561,
+        "20": -8.321433045730894
+      },
+      "breakeven_cost_bps_per_side": 2.02964432743105,
+      "ls_sharpe_net_full_rebuild_10bps_rt": -2.1692890792377235,
+      "macro_f1": 0.3407283589375604,
+      "directional_acc": 0.5072209211553473,
+      "coverage": 0.6189547874334558,
+      "n_obs": 26674,
+      "by_year": {
+        "2018": {
+          "ic_mean": 0.03392439695814923,
+          "ic_tstat": 2.611884324476891,
+          "n_days": 251,
+          "ls_sharpe_gross": 2.387311685143724,
+          "ls_sharpe_net": -0.14313144559881202
+        },
+        "2019": {
+          "ic_mean": 0.011126363546535113,
+          "ic_tstat": 0.8499168607159127,
+          "n_days": 252,
+          "ls_sharpe_gross": 0.9526351088997824,
+          "ls_sharpe_net": -2.486821392479528
+        },
+        "2020": {
+          "ic_mean": -0.008754113352248424,
+          "ic_tstat": -0.5595750485810628,
+          "n_days": 253,
+          "ls_sharpe_gross": -1.0303844781911558,
+          "ls_sharpe_net": -2.786972716306918
+        },
+        "2021": {
+          "ic_mean": 0.0321480559687261,
+          "ic_tstat": 2.1651757156207596,
+          "n_days": 252,
+          "ls_sharpe_gross": 2.3546294203356943,
+          "ls_sharpe_net": -0.0195269463877836
+        }
+      },
+      "by_vix_regime": {
+        "20to30": {
+          "ic_mean": 0.0175876567269195,
+          "ic_tstat": 1.2176298341162004,
+          "n_days": 293,
+          "ls_sharpe_gross": 0.3247457657168274,
+          "ls_sharpe_net": -1.5680394995733054
+        },
+        "ge30": {
+          "ic_mean": -0.006711714775537268,
+          "ic_tstat": -0.27114864899334157,
+          "n_days": 91,
+          "ls_sharpe_gross": -0.7370361478305212,
+          "ls_sharpe_net": -2.305005248250791
+        },
+        "lt20": {
+          "ic_mean": 0.020374523494132997,
+          "ic_tstat": 2.3819771843368436,
+          "n_days": 623,
+          "ls_sharpe_gross": 1.9561180868705563,
+          "ls_sharpe_net": -1.0279175600862083
+        }
+      },
+      "ic_by_month": {
+        "2018-01": -0.033285174176231024,
+        "2018-02": 0.051846315390988704,
+        "2018-03": 0.05033758218442882,
+        "2018-04": 0.0785177339155246,
+        "2018-05": -0.008697241898529618,
+        "2018-06": 0.09866429110178952,
+        "2018-07": -0.07362239706567313,
+        "2018-08": 0.05541524658529558,
+        "2018-09": 0.15034591209330808,
+        "2018-10": 0.018898891600320874,
+        "2018-11": -0.00837246768368069,
+        "2018-12": 0.04202392231541958,
+        "2019-01": 0.026804172514922692,
+        "2019-02": 0.07342812244409079,
+        "2019-03": -0.05655817823717561,
+        "2019-04": -0.025822672483896008,
+        "2019-05": 0.03283503452659681,
+        "2019-06": -0.004203913682147389,
+        "2019-07": 0.013960649568293893,
+        "2019-08": 0.003063422666362782,
+        "2019-09": -0.019016938085013448,
+        "2019-10": 0.07396784590466396,
+        "2019-11": 0.006654278833442771,
+        "2019-12": 0.005190008749417385,
+        "2020-01": -0.05391520193116098,
+        "2020-02": 0.02122664026021132,
+        "2020-03": 0.005150579129792318,
+        "2020-04": -0.027874445007316458,
+        "2020-05": -0.020424632283862713,
+        "2020-06": -0.027070088991841882,
+        "2020-07": -0.03629400192525139,
+        "2020-08": -0.00012660654343459097,
+        "2020-09": 0.02408387736205362,
+        "2020-10": -0.09971643114907627,
+        "2020-11": 0.0844799466326248,
+        "2020-12": 0.035897068776328096,
+        "2021-01": 0.08075320906340111,
+        "2021-02": -0.027897214604704137,
+        "2021-03": 0.08259644267656405,
+        "2021-04": 0.0033878365491452297,
+        "2021-05": -0.043653245396196964,
+        "2021-06": 0.0602793595722134,
+        "2021-07": -0.047956498481839416,
+        "2021-08": -0.05590116290674662,
+        "2021-09": 0.07387099501244336,
+        "2021-10": 0.07310349185984588,
+        "2021-11": 0.08140616057737356,
+        "2021-12": 0.09609185969409507
+      }
+    },
+    "val": {
+      "ic_mean": 0.029145961359527104,
+      "ic_std": 0.2362359456559717,
+      "icir": 0.1233764881910567,
+      "ic_tstat": 1.935084604929732,
+      "ic_hit_rate": 0.5487804878048781,
+      "n_days": 246,
+      "ls_sharpe_gross": 1.1265009002812527,
+      "ls_sharpe_net": -0.9955418733195857,
+      "ls_ann_return_gross": 0.09449334137648387,
+      "ls_ann_return_net": -0.08345088703863231,
+      "cost_bps_per_side": 5,
+      "turnover_mean": 1.4122557640075684,
+      "holding_period_days": 1.416174054145813,
+      "sharpe_by_cost_bps_per_side": {
+        "0": 1.1265009002812527,
+        "5": -0.9955418733195857,
+        "10": -3.11957984871543,
+        "20": -7.366106410216832
+      },
+      "breakeven_cost_bps_per_side": 2.655139291672946,
+      "ls_sharpe_net_full_rebuild_10bps_rt": -1.8777131822733852,
+      "macro_f1": 0.3431849690931618,
+      "directional_acc": 0.5195374800637959,
+      "coverage": 0.615553809897879,
+      "n_obs": 6365,
+      "by_year": {
+        "2022": {
+          "ic_mean": 0.029145961359527104,
+          "ic_tstat": 1.935084604929732,
+          "n_days": 246,
+          "ls_sharpe_gross": 1.1265009002812527,
+          "ls_sharpe_net": -0.9955418733195857
+        }
+      },
+      "by_vix_regime": {
+        "20to30": {
+          "ic_mean": 0.036166298349181704,
+          "ic_tstat": 2.094360589880258,
+          "n_days": 179,
+          "ls_sharpe_gross": 1.7624387725147144,
+          "ls_sharpe_net": -0.4955288560635496
+        },
+        "ge30": {
+          "ic_mean": 0.020909025971348003,
+          "ic_tstat": 0.5608473558214916,
+          "n_days": 48,
+          "ls_sharpe_gross": 0.5898462662004902,
+          "ls_sharpe_net": -1.098410930255327
+        },
+        "lt20": {
+          "ic_mean": -0.016183902983397967,
+          "ic_tstat": -0.3015742388571756,
+          "n_days": 19,
+          "ls_sharpe_gross": -3.471560094031212,
+          "ls_sharpe_net": -5.988191228731159
+        }
+      },
+      "ic_by_month": {
+        "2022-01": 0.027916138611790795,
+        "2022-02": 0.05717596667253417,
+        "2022-03": 0.05619210866847919,
+        "2022-04": -0.04688786806937677,
+        "2022-05": 0.005938998057224661,
+        "2022-06": 0.002190978468553965,
+        "2022-07": -0.04102336743716054,
+        "2022-08": -0.00613973638581319,
+        "2022-09": 0.06788393872137714,
+        "2022-10": 0.006342103994541684,
+        "2022-11": 0.11462098517999139,
+        "2022-12": 0.10168210015536279
+      }
+    }
+  },
+  "vix_regime": {
+    "rule": "prior-day VIX close bucketed at fixed levels",
+    "buckets": [
+      [
+        20.0,
+        "lt20"
+      ],
+      [
+        30.0,
+        "20to30"
+      ],
+      [
+        null,
+        "ge30"
+      ]
+    ]
+  },
+  "scored_text": "title",
+  "n_articles_by_split": {
+    "train": 105738,
+    "val": 37549
+  },
+  "cost_usd_per_1k_articles": 0.0,
+  "cache": {
+    "hits": 143287,
+    "misses": 0
+  },
+  "config": {
+    "universe": {
+      "AAPL": "Apple",
+      "MSFT": "Microsoft",
+      "AMZN": "Amazon",
+      "GOOGL": "Alphabet|Google",
+      "META": "Meta Platforms|Facebook",
+      "NVDA": "Nvidia",
+      "TSLA": "Tesla",
+      "NFLX": "Netflix",
+      "AMD": "Advanced Micro Devices|AMD",
+      "INTC": "Intel",
+      "CSCO": "Cisco",
+      "ORCL": "Oracle",
+      "CRM": "Salesforce",
+      "ADBE": "Adobe",
+      "QCOM": "Qualcomm",
+      "AVGO": "Broadcom",
+      "TXN": "Texas Instruments",
+      "IBM": "International Business Machines|IBM",
+      "PYPL": "PayPal",
+      "UBER": "Uber",
+      "JPM": "JPMorgan|JP Morgan",
+      "BAC": "Bank of America",
+      "GS": "Goldman Sachs",
+      "MS": "Morgan Stanley",
+      "WFC": "Wells Fargo",
+      "C": "Citigroup|Citi",
+      "V": "Visa",
+      "MA": "Mastercard",
+      "JNJ": "Johnson & Johnson",
+      "PFE": "Pfizer",
+      "MRK": "Merck",
+      "ABBV": "AbbVie",
+      "UNH": "UnitedHealth",
+      "WMT": "Walmart",
+      "COST": "Costco",
+      "HD": "Home Depot",
+      "NKE": "Nike",
+      "SBUX": "Starbucks",
+      "DIS": "Disney",
+      "BA": "Boeing",
+      "XOM": "ExxonMobil|Exxon",
+      "CVX": "Chevron",
+      "KO": "Coca-Cola",
+      "PEP": "PepsiCo|Pepsi",
+      "MCD": "McDonald's"
+    },
+    "dates": {
+      "start": "2018-01-01",
+      "end": "2023-12-31"
+    },
+    "paths": {
+      "raw_news_csv": "data/raw/nasdaq_exteral_data.csv",
+      "news": "data/processed/news.parquet",
+      "prices": "data/processed/prices.parquet",
+      "panel": "data/processed/panel.parquet",
+      "events": "data/processed/events.parquet",
+      "signals_dir": "data/signals",
+      "llm_cache": "data/cache/llm_cache.sqlite",
+      "llm_ledger": "data/cache/spend_ledger.jsonl",
+      "vix": "data/processed/vix.parquet",
+      "lexicon_dir": "data/lexicon",
+      "data_quality": "data/processed/data_quality_raw.json"
+    },
+    "labels": {
+      "horizon_days": 1,
+      "top_quantile": 0.3
+    },
+    "split": {
+      "train_end": "2021-12-31",
+      "val_end": "2022-12-31",
+      "embargo_days": 5
+    },
+    "eval": {
+      "min_names_per_day": 5,
+      "cost_bps_per_side": 5,
+      "cost_grid_bps_per_side": [
+        0,
+        5,
+        10,
+        20
+      ]
+    },
+    "finbert": {
+      "model": "ProsusAI/finbert",
+      "batch_size": 64,
+      "max_length": 64
+    },
+    "llm": {
+      "model": "claude-haiku-4-5-20251001",
+      "max_concurrency": 8,
+      "mask_entities": true,
+      "seed": 0,
+      "prices_per_mtok": {
+        "input": 1.0,
+        "output": 5.0
+      },
+      "est_output_tokens": 120,
+      "budget": {
+        "total_usd": 15.0,
+        "reserve_teacher_usd": 4.0
+      },
+      "variants": {
+        "zero_shot": {
+          "split": "val",
+          "max_news_per_stock_day": 1,
+          "n_days": null,
+          "n_examples": 0,
+          "latency_sample": 200,
+          "max_usd": 9.0,
+          "respect_teacher_reserve": true
+        },
+        "few_shot": {
+          "split": "val",
+          "max_news_per_stock_day": 1,
+          "n_days": null,
+          "examples_per_class": {
+            "1": 3,
+            "-1": 3,
+            "0": 2
+          },
+          "latency_sample": 100,
+          "max_usd": 5.0,
+          "respect_teacher_reserve": true
+        }
+      }
+    },
+    "tickers": [
+      "AAPL",
+      "ABBV",
+      "ADBE",
+      "AMD",
+      "AMZN",
+      "AVGO",
+      "BA",
+      "BAC",
+      "C",
+      "COST",
+      "CRM",
+      "CSCO",
+      "CVX",
+      "DIS",
+      "GOOGL",
+      "GS",
+      "HD",
+      "IBM",
+      "INTC",
+      "JNJ",
+      "JPM",
+      "KO",
+      "MA",
+      "MCD",
+      "META",
+      "MRK",
+      "MS",
+      "MSFT",
+      "NFLX",
+      "NKE",
+      "NVDA",
+      "ORCL",
+      "PEP",
+      "PFE",
+      "PYPL",
+      "QCOM",
+      "SBUX",
+      "TSLA",
+      "TXN",
+      "UBER",
+      "UNH",
+      "V",
+      "WFC",
+      "WMT",
+      "XOM"
+    ],
+    "aliases": {
+      "AAPL": [
+        "Apple"
+      ],
+      "MSFT": [
+        "Microsoft"
+      ],
+      "AMZN": [
+        "Amazon"
+      ],
+      "GOOGL": [
+        "Alphabet",
+        "Google"
+      ],
+      "META": [
+        "Meta Platforms",
+        "Facebook"
+      ],
+      "NVDA": [
+        "Nvidia"
+      ],
+      "TSLA": [
+        "Tesla"
+      ],
+      "NFLX": [
+        "Netflix"
+      ],
+      "AMD": [
+        "Advanced Micro Devices",
+        "AMD"
+      ],
+      "INTC": [
+        "Intel"
+      ],
+      "CSCO": [
+        "Cisco"
+      ],
+      "ORCL": [
+        "Oracle"
+      ],
+      "CRM": [
+        "Salesforce"
+      ],
+      "ADBE": [
+        "Adobe"
+      ],
+      "QCOM": [
+        "Qualcomm"
+      ],
+      "AVGO": [
+        "Broadcom"
+      ],
+      "TXN": [
+        "Texas Instruments"
+      ],
+      "IBM": [
+        "International Business Machines",
+        "IBM"
+      ],
+      "PYPL": [
+        "PayPal"
+      ],
+      "UBER": [
+        "Uber"
+      ],
+      "JPM": [
+        "JPMorgan",
+        "JP Morgan"
+      ],
+      "BAC": [
+        "Bank of America"
+      ],
+      "GS": [
+        "Goldman Sachs"
+      ],
+      "MS": [
+        "Morgan Stanley"
+      ],
+      "WFC": [
+        "Wells Fargo"
+      ],
+      "C": [
+        "Citigroup",
+        "Citi"
+      ],
+      "V": [
+        "Visa"
+      ],
+      "MA": [
+        "Mastercard"
+      ],
+      "JNJ": [
+        "Johnson & Johnson"
+      ],
+      "PFE": [
+        "Pfizer"
+      ],
+      "MRK": [
+        "Merck"
+      ],
+      "ABBV": [
+        "AbbVie"
+      ],
+      "UNH": [
+        "UnitedHealth"
+      ],
+      "WMT": [
+        "Walmart"
+      ],
+      "COST": [
+        "Costco"
+      ],
+      "HD": [
+        "Home Depot"
+      ],
+      "NKE": [
+        "Nike"
+      ],
+      "SBUX": [
+        "Starbucks"
+      ],
+      "DIS": [
+        "Disney"
+      ],
+      "BA": [
+        "Boeing"
+      ],
+      "XOM": [
+        "ExxonMobil",
+        "Exxon"
+      ],
+      "CVX": [
+        "Chevron"
+      ],
+      "KO": [
+        "Coca-Cola"
+      ],
+      "PEP": [
+        "PepsiCo",
+        "Pepsi"
+      ],
+      "MCD": [
+        "McDonald's"
+      ]
+    }
+  }
+}
