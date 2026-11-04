@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import hashlib
 import re
+from collections import Counter
 from pathlib import Path
 
 import pandas as pd
@@ -43,39 +44,53 @@ def make_news_id(df: pd.DataFrame) -> pd.Series:
     return keys.map(lambda k: hashlib.sha1(k.encode()).hexdigest()[:16])
 
 
-def clean_chunk(chunk: pd.DataFrame, tickers: set[str], start: str, end: str) -> pd.DataFrame:
+def clean_chunk(chunk: pd.DataFrame, tickers: set[str], start: str, end: str,
+                stats: Counter | None = None) -> pd.DataFrame:
+    """Filter one raw chunk. If `stats` is given, every dropped row is counted by reason."""
+    stats = stats if stats is not None else Counter()
+    stats["raw_rows"] += len(chunk)
     chunk = chunk.rename(
         columns={"Date": "raw_date", "Article_title": "title", "Stock_symbol": "ticker",
                  "Publisher": "publisher", "Article": "body"}
     )
-    chunk["ticker"] = chunk["ticker"].astype(str).str.upper().str.strip()
+    sym = chunk["ticker"].astype("string").str.upper().str.strip()
+    stats["missing_ticker"] += int(sym.isna().sum() + (sym == "").sum())
+    chunk["ticker"] = sym.fillna("")
     chunk = chunk[chunk["ticker"].isin(tickers)]
+    stats["in_universe"] += len(chunk)
     if chunk.empty:
         return chunk
 
     chunk["title"] = chunk["title"].fillna("").astype(str).str.strip()
-    chunk = chunk[chunk["title"].str.len() > 0]
+    empty = chunk["title"].str.len() == 0
+    stats["dropped_empty_title"] += int(empty.sum())
+    chunk = chunk[~empty]
 
     ts, date_only = parse_utc_timestamps(chunk["raw_date"])
+    stats["dropped_bad_timestamp"] += int(ts.isna().sum())
     chunk = chunk.assign(ts_utc=ts, date_only=date_only).dropna(subset=["ts_utc"])
     lo, hi = pd.Timestamp(start, tz="UTC"), pd.Timestamp(end, tz="UTC") + pd.Timedelta(days=1)
-    chunk = chunk[(chunk["ts_utc"] >= lo) & (chunk["ts_utc"] < hi)]
+    in_range = (chunk["ts_utc"] >= lo) & (chunk["ts_utc"] < hi)
+    stats["dropped_out_of_range"] += int((~in_range).sum())
+    chunk = chunk[in_range]
 
     chunk["body"] = chunk["body"].fillna("").astype(str).str.slice(0, ARTICLE_CHARS)
     return chunk[["ts_utc", "date_only", "ticker", "title", "body", "publisher"]]
 
 
 def load_news(csv_path: Path, tickers: list[str], start: str, end: str,
-              chunksize: int = 200_000) -> pd.DataFrame:
+              chunksize: int = 200_000) -> tuple[pd.DataFrame, dict]:
+    """Returns (deduplicated news, counts of every filtering step)."""
     tickers_set = set(tickers)
     parts = []
+    stats: Counter = Counter()
     reader = pd.read_csv(csv_path, usecols=lambda c: c in RAW_COLS, chunksize=chunksize,
                          dtype=str, on_bad_lines="skip")
     for i, chunk in enumerate(reader):
         for col in RAW_COLS:  # some FNSPID shards lack columns; keep the schema fixed
             if col not in chunk.columns:
                 chunk[col] = None
-        part = clean_chunk(chunk, tickers_set, start, end)
+        part = clean_chunk(chunk, tickers_set, start, end, stats)
         if not part.empty:
             parts.append(part)
         if i % 10 == 0:
@@ -84,7 +99,13 @@ def load_news(csv_path: Path, tickers: list[str], start: str, end: str,
     if not parts:
         raise ValueError("No news rows matched the universe/date range. Check the CSV path and tickers.")
     news = pd.concat(parts, ignore_index=True)
-    return deduplicate(news)
+    stats["kept_before_dedup"] = len(news)
+    news = deduplicate(news)
+    stats["duplicates_removed"] = stats["kept_before_dedup"] - len(news)
+    stats["kept_after_dedup"] = len(news)
+    stats["date_only_timestamps"] = int(news["date_only"].sum())
+    # pandas' on_bad_lines="skip" drops malformed CSV lines silently; they are invisible here.
+    return news, dict(stats)
 
 
 def deduplicate(news: pd.DataFrame, window: str = "3D") -> pd.DataFrame:

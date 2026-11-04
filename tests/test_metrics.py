@@ -96,3 +96,14 @@ def test_predicted_classes_match_label_proportions():
     from t2a.eval.metrics import classification_metrics
     df = make_panel(lambda r, rng: rng.normal(), n_days=50)
     assert abs(classification_metrics(df)["coverage"] - 0.6) < 0.05
+
+
+def test_raw_news_filter_counts_every_drop():
+    from pathlib import Path
+    from t2a.data.news import load_news
+    news, st = load_news(Path(__file__).parent / "fixtures" / "raw_news_tiny.csv",
+                         ["AAPL", "MSFT"], "2018-01-01", "2023-12-31")
+    assert st["raw_rows"] == 8 and st["missing_ticker"] == 1 and st["in_universe"] == 6
+    assert st["dropped_empty_title"] == 1 and st["dropped_bad_timestamp"] == 1
+    assert st["dropped_out_of_range"] == 1 and st["duplicates_removed"] == 1
+    assert st["kept_after_dedup"] == len(news) == 2 and st["date_only_timestamps"] == 1
