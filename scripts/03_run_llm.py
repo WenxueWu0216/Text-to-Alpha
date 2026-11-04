@@ -193,7 +193,9 @@ def main():
         "n_articles": n_all, "n_days": int(sub["trade_date"].nunique()),
         "validity": status_summary(sub),
         "cache": {"hits": hits, "misses": n_all - hits, "hit_rate": hits / n_all},
-        "latency": latency_summary(sub.loc[sub["transport"] == "sync", "latency_s"]),
+        # over unique API calls: identical masked articles share one cached call
+        "latency": latency_summary(pd.Series([r.get("latency_s") for r in cache_now.values()
+                                              if r.get("transport") == "sync"], dtype=float)),
         "tokens": {"input": float(tok_in), "output": float(tok_out),
                    "input_per_article": float(tok_in / n_all), "output_per_article": float(tok_out / n_all)},
         "cost_usd_per_1k_articles": {

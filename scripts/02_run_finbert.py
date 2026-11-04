@@ -42,7 +42,7 @@ def main():
     print(f"FinBERT scores: {len(events) - len(todo):,} from cache, {len(todo):,} newly scored")
 
     events = events.merge(cached, on="news_id", how="left")
-    extra = {"scored_text": "title", "n_articles": len(events),
+    extra = {"scored_text": "title", "n_articles_by_split": events["split"].value_counts().to_dict(),
              "cost_usd_per_1k_articles": 0.0,  # local model: no API cost
              "cache": {"hits": len(events) - len(todo), "misses": len(todo)}}
     if latency:
