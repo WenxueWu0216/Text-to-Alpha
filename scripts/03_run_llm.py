@@ -76,6 +76,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--variant", choices=["zero_shot", "few_shot"], default="zero_shot")
     ap.add_argument("--estimate-only", action="store_true")
+    ap.add_argument("--limit", type=int, default=None,
+                    help="smoke test: score only N uncached articles synchronously, then stop")
     args = ap.parse_args()
 
     cfg = load_config()
@@ -102,6 +104,20 @@ def main():
     todo = list(dict.fromkeys(k for k in keys if k not in cached_before))  # dedupe, keep order
     msg_of = dict(zip(keys, messages))
     print(f"cache: {len(keys) - sum(k not in cached_before for k in keys):,} hits, {len(todo):,} to score")
+
+    if args.limit is not None:
+        # Same requests, same cache as the full run: smoke-tested articles are never paid twice.
+        trial = todo[:args.limit]
+        out = scorer.score_sync(system, [(k, msg_of[k]) for k in trial])
+        recs = list(scorer.cache.get_many(trial).values())
+        ledger.record(f"{name}:smoke", spend_of(recs, prices), calls=len(recs), prompt_version=PROMPT_VERSION)
+        for r in out:
+            print(json.dumps({k: r.get(k) for k in ("status", "event_type", "direction", "confidence",
+                                                    "rationale", "input_tokens", "output_tokens",
+                                                    "latency_s", "error", "validation_error")}))
+        print(f"smoke test: {sum(r.get('status') == 'ok' for r in out)}/{len(out)} ok, "
+              f"cost ${spend_of(recs, prices):.4f}")
+        return
 
     if todo:
         rng = np.random.default_rng(seed)
