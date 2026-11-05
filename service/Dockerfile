@@ -24,13 +24,20 @@ FROM ${PYTHON} AS deps
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=10
 RUN python -m venv /opt/venv
 COPY service/requirements.txt /tmp/
+# Then drop what inference never imports: tokenizers' hub-download deps (we load tokenizer.json
+# from disk), onnxruntime's Python tooling, test suites, and pip itself.
 RUN --mount=type=cache,target=/root/.cache/pip /opt/venv/bin/pip install -r /tmp/requirements.txt \
- && find /opt/venv -name __pycache__ -prune -exec rm -rf {} + \
- && rm -rf /opt/venv/lib/python3.12/site-packages/pip /opt/venv/bin/pip*
+ && /opt/venv/bin/pip uninstall -y -q huggingface_hub hf_xet fsspec tqdm pyyaml filelock \
+ && cd /opt/venv/lib/python3.12/site-packages \
+ && rm -rf onnxruntime/transformers onnxruntime/quantization onnxruntime/tools onnxruntime/datasets \
+ && find . -type d \( -name tests -o -name __pycache__ \) -prune -exec rm -rf {} + \
+ && rm -rf pip /opt/venv/bin/pip*
 
 # ---- runtime ---------------------------------------------------------------------------
 FROM ${PYTHON}
-RUN useradd --create-home --uid 1000 app
+RUN useradd --create-home --uid 1000 app \
+ && rm -rf /usr/local/lib/python3.12/site-packages/pip /usr/local/lib/python3.12/ensurepip \
+           /usr/local/lib/python3.12/idlelib /usr/local/bin/pip*
 ENV PATH=/opt/venv/bin:$PATH PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 \
     T2A_MODEL_DIR=/models/finbert-onnx T2A_RESULTS_DIR=/srv/results PORT=8080
 COPY --from=deps /opt/venv /opt/venv
