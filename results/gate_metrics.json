@@ -1,47 +1,59 @@
 {
   "method": "gate_metrics",
-  "created_utc": "2026-11-05T18:02:01+00:00",
-  "git_commit": "acf7aa9cdb77af6df9a3bbc52372ed078e6d2557",
+  "created_utc": "2026-11-05T18:32:47+00:00",
+  "git_commit": "bcc2e545b09735a1359c917c4dd6ed29b469905e",
   "git_dirty": false,
-  "source": "models/finbert-onnx/model.int8.onnx",
+  "source": "models/finbert-onnx/model.fp16w.onnx",
   "fixture_rows": 1508,
   "metrics": {
-    "ic_mean": -0.02746003848269252,
-    "ic_tstat": -1.0613398615537533,
-    "ic_hit_rate": 0.46551724137931033,
+    "ic_mean": -0.02881626960904566,
+    "ic_tstat": -1.1067245881070606,
+    "ic_hit_rate": 0.4482758620689655,
     "n_days": 58,
     "n_obs": 1508,
-    "ls_sharpe_gross": -0.7377250611317938,
-    "ls_sharpe_net": -3.1289901316490796,
-    "macro_f1": 0.3281081510676276
+    "ls_sharpe_gross": -0.7784739718503313,
+    "ls_sharpe_net": -3.1705729776714913,
+    "macro_f1": 0.3239280679746919
   },
   "agreement": {
-    "score_spearman_vs_reference": 0.9960860976699668,
-    "mean_abs_score_diff_vs_reference": 0.01733182982977506,
-    "max_abs_score_diff_vs_reference": 0.2881324783558803
+    "score_spearman_vs_reference": 0.9999994392419419,
+    "mean_abs_score_diff_vs_reference": 8.135100702240475e-05,
+    "max_abs_score_diff_vs_reference": 0.0019447429955826712
   },
   "thresholds": {
-    "reference_ic": -0.02746,
-    "ic_margin": 0.005,
-    "min_ic": -0.03246,
+    "served_model": "model.fp16w.onnx (fp16-stored weights, fp32 compute)",
+    "reference_ic": -0.02882,
+    "ic_margin": 0.002,
+    "min_ic": -0.03082,
     "reference_scores": "reference_scores_fp32.parquet",
-    "min_score_spearman": 0.98,
-    "max_mean_abs_score_diff": 0.035,
+    "min_score_spearman": 0.999,
+    "max_mean_abs_score_diff": 0.005,
     "measured": {
-      "fp32_onnx_ic": -0.029,
-      "int8_per_channel_ic": -0.02746,
-      "int8_minus_fp32_ic": 0.00154,
-      "int8_vs_fp32_score_spearman": 0.9961,
-      "int8_vs_fp32_mean_abs_score_diff": 0.0173,
-      "int8_per_tensor_mean_abs_score_diff": 0.0497,
+      "fp32_onnx_ic": -0.02901,
+      "fp16w_ic": -0.02882,
+      "fp16w_minus_fp32_ic": 0.00019,
+      "fp16w_vs_fp32_score_spearman": 0.999999,
+      "fp16w_vs_fp32_mean_abs_score_diff": 8.1e-05,
       "fp32_onnx_vs_torch_max_abs_score_diff": 7.8e-06,
-      "inference": "one unpadded forward pass per headline",
-      "measured_on": "Apple M4, onnxruntime 1.31.1"
+      "inference": "length-sorted micro-batches of 8",
+      "measured_on": "Apple M4, onnxruntime 1.31.1; the fp16w IC was identical on x86 AMD EPYC 7763 in the sweep"
+    },
+    "rejected_int8_dynamic_per_channel": {
+      "spearman_vs_fp32": {
+        "apple_m4": 0.9961,
+        "x86_epyc_9v74_avx512_vnni": 0.9277,
+        "x86_epyc_7763_avx2_no_vnni": 0.1463
+      },
+      "ic_minus_fp32": {
+        "apple_m4": 0.00154,
+        "x86_epyc_9v74_avx512_vnni": 0.0073,
+        "x86_epyc_7763_avx2_no_vnni": 0.00531
+      }
     },
     "rationale": [
-      "reference_ic = IC of the served int8 model on the frozen fixture at the time the gate was set.",
-      "Fixture and model are frozen, so IC can only move through numerics. Numerics-only changes measured on this fixture moved IC by up to 0.004 (int8 scheme choice; padded batching vs single passes). x86 int8 kernels (Cloud Run, GitHub runners) differ from ARM ones. A 0.005 margin avoids false failures from the CPU alone.",
-      "One standard error of a 58-day mean IC is about 0.026, so the IC check alone cannot catch small regressions, and with a negative reference IC it cannot catch a sign flip. The agreement check against the frozen fp32 scores (CPU-independent: they match torch to 1e-5) catches label-order, tokenizer and quantization regressions. Its thresholds are about 2x the measured int8 error; per-tensor int8 (mean diff 0.050) would fail it."
+      "reference_ic = fixture IC of the served model when the gate was set.",
+      "The served model computes in fp32, which gave the same scores on every CPU we measured (Apple M4 and two x86 EPYCs). So with the fixture frozen, IC can only move if the model or the pipeline changes. The margin, 0.002, equals the tolerance allowed for compressing the model: a future compression step within that budget passes, anything larger fails.",
+      "One standard error of a 58-day mean IC is about 0.026, so the IC check alone cannot catch small regressions, and with a negative reference IC it cannot catch a sign flip. The agreement check against the frozen fp32 scores catches label-order, tokenizer and compression regressions. Measured mean abs diff is 0.00008; the 0.005 limit rejects every int8 variant we tried (best: 0.017 on ARM, 0.13 on x86)."
     ]
   },
   "checks": {
