@@ -1,0 +1,39 @@
+name: Quantization sweep
+
+# int8 kernels differ by CPU, so compression variants are compared on real x86 runners.
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - service/scripts/quant_sweep.py
+      - .github/workflows/quant-sweep.yml
+
+permissions:
+  contents: read
+
+jobs:
+  sweep:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements-ci.txt
+            service/requirements-export.txt
+      - run: |
+          pip install --index-url https://download.pytorch.org/whl/cpu torch==2.14.0
+          pip install -r requirements-ci.txt -r service/requirements-export.txt
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-finbert-0bc2ac10
+      - run: python service/scripts/export_onnx.py --out models/finbert-onnx
+      - run: grep -o -w -E 'avx2|avx512f|avx512_vnni|avx_vnni' /proc/cpuinfo | sort -u | tr '\n' ' '
+      - run: python service/scripts/quant_sweep.py --out sweep.json | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: quant-sweep
+          path: sweep.json

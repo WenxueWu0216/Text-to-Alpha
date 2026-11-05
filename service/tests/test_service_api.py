@@ -1,6 +1,7 @@
 import os
 
 import pytest
+
 from app.schemas import MAX_HEADLINES
 
 
@@ -14,8 +15,9 @@ def test_health(client):
 
 
 def test_model_loaded_once_at_startup(fake_scorer, results_dir):
-    from app.main import create_app
     from fastapi.testclient import TestClient
+
+    from app.main import create_app
 
     loads = []
 
@@ -105,8 +107,9 @@ def test_metrics_read_only(client):
 
 
 def test_metrics_with_no_results(fake_scorer, tmp_path):
-    from app.main import create_app
     from fastapi.testclient import TestClient
+
+    from app.main import create_app
 
     with TestClient(create_app(load_scorer=lambda: fake_scorer, results_dir=tmp_path)) as c:
         assert c.get("/metrics").json() == {"methods": {}, "same_subset": None, "service_latency": None,
@@ -127,8 +130,9 @@ def test_metrics_parses_real_results():
 @pytest.mark.skipif(os.environ.get("T2A_MODEL_TESTS") != "1",
                     reason="needs models/finbert-onnx (service/scripts/export_onnx.py); set T2A_MODEL_TESTS=1")
 def test_real_finbert_end_to_end(results_dir):
-    from app.main import create_app
     from fastapi.testclient import TestClient
+
+    from app.main import create_app
 
     heads = ["Company shares plunge after profit warning", "Record quarterly profit beats expectations"]
     with TestClient(create_app(results_dir=results_dir)) as c:

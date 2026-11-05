@@ -55,8 +55,9 @@ def results_dir(tmp_path):
 
 @pytest.fixture
 def client(fake_scorer, results_dir):
-    from app.main import create_app
     from fastapi.testclient import TestClient
+
+    from app.main import create_app
 
     with TestClient(create_app(load_scorer=lambda: fake_scorer, results_dir=results_dir)) as c:
         yield c
