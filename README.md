@@ -79,7 +79,7 @@ src/t2a/signals/           FinBERT scorer, LLM extractor, stock-day aggregation
 src/t2a/eval/              IC / long-short / classification metrics, per-split report
 scripts/                   one script per pipeline step
 tests/                     unit tests for the parts where bugs are silent
-service/                   FastAPI FinBERT service (int8 ONNX) + Dockerfile + eval fixture (service/README.md)
+service/                   FastAPI FinBERT service (ONNX, fp16 weights) + Dockerfile + eval fixture (service/README.md)
 infra/                     one-time GCP setup (Cloud Run, Artifact Registry, Workload Identity Federation)
 .github/workflows/         ci.yml (ruff, pytest, eval gate) and deploy.yml (gate -> Cloud Run)
 ```

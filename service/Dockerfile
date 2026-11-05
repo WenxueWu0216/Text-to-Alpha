@@ -1,11 +1,11 @@
 # syntax=docker/dockerfile:1
-# FinBERT scoring service: int8 ONNX on CPU, no torch at runtime.
+# FinBERT scoring service: ONNX (fp16-stored weights, fp32 compute) on CPU, no torch at runtime.
 #   docker build -f service/Dockerfile -t t2a-service .     (from the repo root)
 #   docker run --rm -p 8080:8080 t2a-service
 
 ARG PYTHON=python:3.12-slim
 
-# ---- export: download pinned weights, FinBERT -> ONNX fp32 -> int8 ----------------------
+# ---- export: download pinned weights, FinBERT -> ONNX fp32 -> fp16-stored weights -------
 FROM ${PYTHON} AS export
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_DEFAULT_TIMEOUT=120 PIP_RETRIES=10
 RUN --mount=type=cache,target=/root/.cache/pip \

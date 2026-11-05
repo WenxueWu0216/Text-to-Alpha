@@ -39,7 +39,7 @@ class ScoreResponse(BaseModel):
 class HealthResponse(BaseModel):
     status: Literal["ok"]
     model: str
-    variant: str = Field(description="served weights, e.g. int8")
+    variant: str = Field(description="served weights, e.g. fp16w (fp16 storage, fp32 compute)")
     device: str
     uptime_s: float = Field(description="seconds since this instance started loading the model; "
                                         "small on the first request = that request hit a cold start")

@@ -15,4 +15,4 @@ ignore = ["E731", "B905"]
 "scripts/05_data_quality.py" = ["E501"]   # markdown report template
 
 [lint.isort]
-known-first-party = ["t2a", "app", "eval_gate"]
+known-first-party = ["t2a", "app", "eval_gate", "export_onnx"]

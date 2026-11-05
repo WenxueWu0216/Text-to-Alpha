@@ -137,7 +137,7 @@ def test_real_finbert_end_to_end(results_dir):
     heads = ["Company shares plunge after profit warning", "Record quarterly profit beats expectations"]
     with TestClient(create_app(results_dir=results_dir)) as c:
         h = c.get("/health").json()
-        assert h["device"] == "cpu" and h["variant"] == "int8"
+        assert h["device"] == "cpu" and h["variant"] == "fp16w"
         s = c.post("/score", json={"headlines": heads}).json()["scores"]
     assert s[0]["score"] < 0 < s[1]["score"]
     assert [x["headline"] for x in s] == heads

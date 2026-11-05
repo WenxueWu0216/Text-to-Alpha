@@ -21,35 +21,13 @@ sys.path[:0] = [str(ROOT / "src"), str(ROOT / "service"), str(ROOT / "scripts")]
 import numpy as np
 import onnx
 import pandas as pd
-from onnx import TensorProto, helper, numpy_helper
 from onnxruntime.quantization import QuantType, quantize_dynamic
 from scipy.stats import spearmanr
 
 from app.model import OnnxFinBert
 from eval_gate import FIXTURE_DIR, fixture_metrics, score_local
+from export_onnx import fp16_weights  # same function that builds the served file
 from t2a.config import load_config
-
-
-def fp16_weights(src: Path, dst: Path) -> None:
-    """fp16 storage, fp32 compute: each large fp32 initializer becomes fp16 + Cast(to=float).
-    onnxruntime constant-folds the Casts at session load, so inference is plain fp32."""
-    m = onnx.load(str(src))
-    keep, casts = [], []
-    for init in m.graph.initializer:
-        if init.data_type == TensorProto.FLOAT and int(np.prod(init.dims)) >= 1024:
-            h = numpy_helper.from_array(numpy_helper.to_array(init).astype(np.float16), init.name + "__fp16")
-            casts.append(helper.make_node("Cast", [h.name], [init.name], to=TensorProto.FLOAT,
-                                          name=init.name + "__cast"))
-            keep.append(h)
-        else:
-            keep.append(init)
-    del m.graph.initializer[:]
-    m.graph.initializer.extend(keep)
-    nodes = casts + list(m.graph.node)
-    del m.graph.node[:]
-    m.graph.node.extend(nodes)
-    onnx.checker.check_model(m)
-    onnx.save(m, str(dst))
 
 
 def act_x_act_matmuls(path: Path) -> list[str]:

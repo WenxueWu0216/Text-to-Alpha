@@ -1,7 +1,7 @@
 """Eval gate: score the frozen fixture with the SERVED model and fail if quality regressed.
 
   python scripts/eval_gate.py --url http://127.0.0.1:7860      # a running service (the image that ships)
-  python scripts/eval_gate.py                                  # in-process, models/finbert-onnx/model.int8.onnx
+  python scripts/eval_gate.py                                  # in-process, models/finbert-onnx/model.fp16w.onnx
   python scripts/eval_gate.py --model-file model.fp32.onnx --no-gate --out results/fixture_fp32.json
 
 Two checks, both against numbers frozen in service/eval_fixture/gate.json:
@@ -68,7 +68,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--url", help="score through a running service instead of in-process")
     ap.add_argument("--model-dir", type=Path, default=ROOT / "models" / "finbert-onnx")
-    ap.add_argument("--model-file", default="model.int8.onnx")
+    ap.add_argument("--model-file", default="model.fp16w.onnx")
     ap.add_argument("--out", type=Path, default=ROOT / "results" / "gate_metrics.json")
     ap.add_argument("--no-gate", action="store_true", help="report only, never fail")
     ap.add_argument("--save-scores", type=Path, help="write the scores (to freeze a new reference)")
