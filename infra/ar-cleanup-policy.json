@@ -1,4 +1,4 @@
 [
-  {"name": "keep-3-newest", "action": {"type": "Keep"}, "mostRecentVersions": {"keepCount": 3}},
+  {"name": "keep-2-newest", "action": {"type": "Keep"}, "mostRecentVersions": {"keepCount": 2}},
   {"name": "delete-older-than-1d", "action": {"type": "Delete"}, "condition": {"olderThan": "1d"}}
 ]

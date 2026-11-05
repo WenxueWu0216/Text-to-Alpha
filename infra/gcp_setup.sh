@@ -2,7 +2,7 @@
 # One-time GCP setup for the Text-to-Alpha model service (Cloud Run, us-central1).
 # Run step by step; every command creates or changes a resource. Free tier only:
 #   Cloud Run request-based billing (180k vCPU-s, 360k GiB-s, 2M requests / month free),
-#   Artifact Registry 0.5 GB free (cleanup policy keeps the 3 newest images).
+#   Artifact Registry 0.5 GB free (cleanup policy keeps the 2 newest images: current + rollback).
 # No JSON service-account keys: GitHub Actions authenticates via Workload Identity Federation.
 set -euo pipefail
 
