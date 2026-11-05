@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 import subprocess
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -66,7 +66,7 @@ def _nan_to_none(o: Any):
 def write_result(name: str, payload: dict, cfg: dict, out_dir: Path = RESULTS_DIR) -> Path:
     doc = {
         "method": name,
-        "created_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "created_utc": datetime.now(UTC).isoformat(timespec="seconds"),
         "git_commit": git_commit(),
         "git_dirty": git_dirty(),
         **payload,

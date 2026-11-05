@@ -1,11 +1,10 @@
 """Turnover, costs, break-even and regime breakdowns of the shared evaluator."""
 import numpy as np
 import pandas as pd
+from test_metrics import make_panel
 
 from t2a.data.market import prior_close, vix_regime
-from t2a.eval.metrics import (breakeven_cost_bps, evaluate, long_short_book, net_returns,
-                              trading_summary)
-from test_metrics import make_panel
+from t2a.eval.metrics import breakeven_cost_bps, evaluate, long_short_book, net_returns, trading_summary
 
 
 def _frame(days: list[dict[str, float]], rets: list[dict[str, float]]) -> pd.DataFrame:

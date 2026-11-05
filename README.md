@@ -1,5 +1,8 @@
 # Text-to-Alpha
 
+[![CI](https://github.com/WenxueWu0216/Text-to-Alpha/actions/workflows/ci.yml/badge.svg)](https://github.com/WenxueWu0216/Text-to-Alpha/actions/workflows/ci.yml)
+[![Deploy](https://github.com/WenxueWu0216/Text-to-Alpha/actions/workflows/deploy.yml/badge.svg)](https://github.com/WenxueWu0216/Text-to-Alpha/actions/workflows/deploy.yml)
+
 Benchmarking NLP/LLM approaches for extracting trading signals from financial news.
 
 **Hypothesis:** LLM-extracted event signals from news predict next-day relative stock
@@ -25,6 +28,16 @@ cross-sectional IC, long-short Sharpe (net of costs), classification metrics, an
 - News: [FNSPID](https://github.com/Zdong104/FNSPID_Financial_News_Dataset) (Dong et al., KDD 2024), CC BY-NC 4.0.
   Download `Stock_news/nasdaq_exteral_data.csv` into `data/raw/`.
 - Prices: daily adjusted open/close from Yahoo Finance (`yfinance`).
+
+### Attribution and license of the news data
+
+News headlines come from **FNSPID** (Financial News and Stock Price Integration Dataset):
+Zihan Dong, Xinyu Fan, Zhiyuan Peng, *FNSPID: A Comprehensive Financial News Dataset in Time Series*,
+KDD 2024 ([paper](https://arxiv.org/abs/2402.06698), [data](https://github.com/Zdong104/FNSPID_Financial_News_Dataset)),
+licensed under [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/).
+The frozen CI fixture `service/eval_fixture/val_fixture.parquet` redistributes 1,508 FNSPID
+headlines (unchanged) with returns computed from Yahoo Finance prices. It is shared under the same
+CC BY-NC 4.0 terms: attribution required, **non-commercial use only**.
 
 ## Key design decisions
 
@@ -66,5 +79,7 @@ src/t2a/signals/           FinBERT scorer, LLM extractor, stock-day aggregation
 src/t2a/eval/              IC / long-short / classification metrics, per-split report
 scripts/                   one script per pipeline step
 tests/                     unit tests for the parts where bugs are silent
-service/                   FastAPI FinBERT service + Dockerfile (see service/README.md)
+service/                   FastAPI FinBERT service (int8 ONNX) + Dockerfile + eval fixture (service/README.md)
+infra/                     one-time GCP setup (Cloud Run, Artifact Registry, Workload Identity Federation)
+.github/workflows/         ci.yml (ruff, pytest, eval gate) and deploy.yml (gate -> Cloud Run)
 ```

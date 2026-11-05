@@ -1,9 +1,9 @@
 import numpy as np
-from sklearn.metrics import f1_score
 import pandas as pd
+from sklearn.metrics import f1_score
 
-from t2a.eval.metrics import daily_ic, evaluate, long_short_book, long_short_returns, portfolio_weights
 from t2a.data.news import deduplicate, mask_entities
+from t2a.eval.metrics import daily_ic, evaluate, long_short_book, long_short_returns, portfolio_weights
 
 
 def make_panel(signal_fn, n_days=50, n_names=10, seed=0):
@@ -100,6 +100,7 @@ def test_predicted_classes_match_label_proportions():
 
 def test_raw_news_filter_counts_every_drop():
     from pathlib import Path
+
     from t2a.data.news import load_news
     news, st = load_news(Path(__file__).parent / "fixtures" / "raw_news_tiny.csv",
                          ["AAPL", "MSFT"], "2018-01-01", "2023-12-31")

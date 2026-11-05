@@ -1,6 +1,7 @@
-# Service runtime deps. torch is installed separately from the CPU-only index (see Dockerfile);
-# locally, any torch>=2.2 works.
+# Service runtime: onnxruntime + tokenizers, no torch / transformers.
 fastapi==0.162.0
 uvicorn==0.54.0
 pydantic==2.13.5
-transformers==5.17.0
+numpy==2.5.3
+onnxruntime==1.31.1
+tokenizers==0.23.2

@@ -25,7 +25,8 @@ def main():
     coverage = float((events["lexicon"] != 0).mean())
     print(f"articles with at least one LM word (non-zero score): {coverage:.1%}")
     report(to_stock_day(events, "lexicon"), cfg, "lexicon_lm",
-           extra={"scored_text": "title + article lead (1500 chars)", "n_articles_by_split": events["split"].value_counts().to_dict(),
+           extra={"scored_text": "title + article lead (1500 chars)",
+                  "n_articles_by_split": events["split"].value_counts().to_dict(),
                   "nonzero_score_share": coverage, "cost_usd_per_1k_articles": 0.0,
                   "lexicon": "Loughran-McDonald (pysentiment2 0.1.1 copy)",
                   "n_positive_words": len(scorer.pos), "n_negative_words": len(scorer.neg)})

@@ -1,0 +1,24 @@
+{
+  "reference_ic": -0.02746,
+  "ic_margin": 0.005,
+  "min_ic": -0.03246,
+  "reference_scores": "reference_scores_fp32.parquet",
+  "min_score_spearman": 0.98,
+  "max_mean_abs_score_diff": 0.035,
+  "measured": {
+    "fp32_onnx_ic": -0.029,
+    "int8_per_channel_ic": -0.02746,
+    "int8_minus_fp32_ic": 0.00154,
+    "int8_vs_fp32_score_spearman": 0.9961,
+    "int8_vs_fp32_mean_abs_score_diff": 0.0173,
+    "int8_per_tensor_mean_abs_score_diff": 0.0497,
+    "fp32_onnx_vs_torch_max_abs_score_diff": 7.8e-06,
+    "inference": "one unpadded forward pass per headline",
+    "measured_on": "Apple M4, onnxruntime 1.31.1"
+  },
+  "rationale": [
+    "reference_ic = IC of the served int8 model on the frozen fixture at the time the gate was set.",
+    "Fixture and model are frozen, so IC can only move through numerics. Numerics-only changes measured on this fixture moved IC by up to 0.004 (int8 scheme choice; padded batching vs single passes). x86 int8 kernels (Cloud Run, GitHub runners) differ from ARM ones. A 0.005 margin avoids false failures from the CPU alone.",
+    "One standard error of a 58-day mean IC is about 0.026, so the IC check alone cannot catch small regressions, and with a negative reference IC it cannot catch a sign flip. The agreement check against the frozen fp32 scores (CPU-independent: they match torch to 1e-5) catches label-order, tokenizer and quantization regressions. Its thresholds are about 2x the measured int8 error; per-tensor int8 (mean diff 0.050) would fail it."
+  ]
+}

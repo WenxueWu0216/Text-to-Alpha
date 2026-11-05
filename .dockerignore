@@ -2,5 +2,7 @@
 *
 !service/app
 !service/requirements.txt
+!service/requirements-export.txt
+!service/scripts/export_onnx.py
 !results/*.json
 **/__pycache__

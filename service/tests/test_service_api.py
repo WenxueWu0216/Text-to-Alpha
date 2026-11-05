@@ -1,20 +1,21 @@
 import os
 
 import pytest
-
 from app.schemas import MAX_HEADLINES
 
 
 def test_health(client):
     r = client.get("/health")
     assert r.status_code == 200
-    assert r.json() == {"status": "ok", "model": "fake-finbert", "device": "cpu"}
+    h = r.json()
+    assert {k: h[k] for k in ("status", "model", "variant", "device")} == {
+        "status": "ok", "model": "fake-finbert", "variant": "fake", "device": "cpu"}
+    assert h["uptime_s"] >= 0 and h["model_load_s"] >= 0
 
 
 def test_model_loaded_once_at_startup(fake_scorer, results_dir):
-    from fastapi.testclient import TestClient
-
     from app.main import create_app
+    from fastapi.testclient import TestClient
 
     loads = []
 
@@ -104,12 +105,12 @@ def test_metrics_read_only(client):
 
 
 def test_metrics_with_no_results(fake_scorer, tmp_path):
+    from app.main import create_app
     from fastapi.testclient import TestClient
 
-    from app.main import create_app
-
     with TestClient(create_app(load_scorer=lambda: fake_scorer, results_dir=tmp_path)) as c:
-        assert c.get("/metrics").json() == {"methods": {}, "same_subset": None, "service_latency": None}
+        assert c.get("/metrics").json() == {"methods": {}, "same_subset": None, "service_latency": None,
+                                          "gate": None}
 
 
 def test_metrics_parses_real_results():
@@ -123,15 +124,28 @@ def test_metrics_parses_real_results():
     assert m.same_subset is not None and m.same_subset.n_articles > 0
 
 
-@pytest.mark.skipif(os.environ.get("T2A_MODEL_TESTS") != "1", reason="needs FinBERT weights; set T2A_MODEL_TESTS=1")
+@pytest.mark.skipif(os.environ.get("T2A_MODEL_TESTS") != "1",
+                    reason="needs models/finbert-onnx (service/scripts/export_onnx.py); set T2A_MODEL_TESTS=1")
 def test_real_finbert_end_to_end(results_dir):
-    from fastapi.testclient import TestClient
-
     from app.main import create_app
+    from fastapi.testclient import TestClient
 
     heads = ["Company shares plunge after profit warning", "Record quarterly profit beats expectations"]
     with TestClient(create_app(results_dir=results_dir)) as c:
-        assert c.get("/health").json()["device"] == "cpu"
+        h = c.get("/health").json()
+        assert h["device"] == "cpu" and h["variant"] == "int8"
         s = c.post("/score", json={"headlines": heads}).json()["scores"]
     assert s[0]["score"] < 0 < s[1]["score"]
     assert [x["headline"] for x in s] == heads
+
+
+@pytest.mark.skipif(os.environ.get("T2A_MODEL_TESTS") != "1", reason="needs models/finbert-onnx; set T2A_MODEL_TESTS=1")
+def test_onnx_tokenizer_matches_padding_free_scores():
+    """Padding must not change a headline's score: batched == one at a time."""
+    from app.model import load_finbert
+
+    m = load_finbert()
+    heads = ["Short", "A much longer headline about quarterly earnings beating every analyst estimate"]
+    batched = [p.score for p in m.predict(heads)]
+    single = [m.predict([h])[0].score for h in heads]
+    assert batched == pytest.approx(single, abs=1e-4)

@@ -24,8 +24,16 @@ from t2a.eval.llm_analysis import by_event_type, latency_summary, status_summary
 from t2a.eval.report import evaluate_splits, regime_labels, report
 from t2a.signals.aggregate import to_stock_day
 from t2a.signals.budget import BudgetExceeded, Ledger, check_budget
-from t2a.signals.llm import (MAX_TOKENS, PROMPT_VERSION, ClaudeScorer, Prices, build_system,
-                             build_user_message, cache_key, records_to_frame)
+from t2a.signals.llm import (
+    MAX_TOKENS,
+    PROMPT_VERSION,
+    ClaudeScorer,
+    Prices,
+    build_system,
+    build_user_message,
+    cache_key,
+    records_to_frame,
+)
 from t2a.signals.sampling import cap_per_stock_day, sample_days, select_fewshot_examples
 
 N_COUNT_SAMPLE = 25

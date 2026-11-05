@@ -1,0 +1,5 @@
+# Build-time only (Docker export stage): FinBERT -> ONNX -> int8. torch comes from the CPU index.
+transformers==5.17.0
+onnx==1.23.2
+onnxscript==0.7.2
+onnxruntime==1.31.1

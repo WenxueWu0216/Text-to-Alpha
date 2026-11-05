@@ -6,6 +6,8 @@
 *.sqlite
 *.sqlite3
 *.parquet
+# frozen ~100 KB CI fixture
+!service/eval_fixture/*.parquet
 *.safetensors
 *.bin
 *.pt

@@ -15,6 +15,7 @@ class FakeScorer:
     Score depends on the text (keyword + length), so a reordering bug would show up.
     """
     name = "fake-finbert"
+    variant = "fake"
     device = "cpu"
 
     def __init__(self):
@@ -54,9 +55,8 @@ def results_dir(tmp_path):
 
 @pytest.fixture
 def client(fake_scorer, results_dir):
-    from fastapi.testclient import TestClient
-
     from app.main import create_app
+    from fastapi.testclient import TestClient
 
     with TestClient(create_app(load_scorer=lambda: fake_scorer, results_dir=results_dir)) as c:
         yield c
