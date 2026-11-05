@@ -54,6 +54,7 @@ pytest -q                       # look-ahead, split, and metric tests
 python scripts/01_build_dataset.py
 python scripts/02_run_finbert.py
 python scripts/03_run_llm.py
+python scripts/07_same_subset_table.py   # all methods on the same val articles, from cache
 ```
 
 ## Layout
@@ -65,4 +66,5 @@ src/t2a/signals/           FinBERT scorer, LLM extractor, stock-day aggregation
 src/t2a/eval/              IC / long-short / classification metrics, per-split report
 scripts/                   one script per pipeline step
 tests/                     unit tests for the parts where bugs are silent
+service/                   FastAPI FinBERT service + Dockerfile (see service/README.md)
 ```

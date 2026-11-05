@@ -1,0 +1,6 @@
+# Service runtime deps. torch is installed separately from the CPU-only index (see Dockerfile);
+# locally, any torch>=2.2 works.
+fastapi==0.162.0
+uvicorn==0.54.0
+pydantic==2.13.5
+transformers==5.17.0
