@@ -39,7 +39,11 @@ class ScoreResponse(BaseModel):
 class HealthResponse(BaseModel):
     status: Literal["ok"]
     model: str
+    variant: str = Field(description="served weights, e.g. fp16w (fp16 storage, fp32 compute)")
     device: str
+    uptime_s: float = Field(description="seconds since this instance started loading the model; "
+                                        "small on the first request = that request hit a cold start")
+    model_load_s: float
 
 
 class HeadlineMetrics(BaseModel):
@@ -76,3 +80,4 @@ class MetricsResponse(BaseModel):
     same_subset: SameSubsetResult | None = Field(
         None, description="all methods on the same validation articles (the fair comparison)")
     service_latency: dict | None = None
+    gate: dict | None = Field(None, description="eval gate result for the served model (results/gate_metrics.json)")

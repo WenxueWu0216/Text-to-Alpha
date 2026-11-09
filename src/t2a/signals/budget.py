@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 
@@ -28,7 +28,7 @@ class Ledger:
         if usd <= 0:
             return
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        entry = {"utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        entry = {"utc": datetime.now(UTC).isoformat(timespec="seconds"),
                  "label": label, "usd": round(usd, 6), **info}
         with open(self.path, "a") as f:
             f.write(json.dumps(entry) + "\n")

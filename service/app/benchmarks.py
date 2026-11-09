@@ -32,7 +32,10 @@ def load_metrics(results_dir: Path) -> MetricsResponse:
         same = SameSubsetResult(split=d["split"], n_articles=d["n_articles"], n_trade_days=d["n_trade_days"],
                                 git_commit=d.get("git_commit"),
                                 methods={k: _headline(m) for k, m in d["metrics"].items()})
-    lat = _read(results_dir / "service_latency.json")
-    if lat:
-        lat.pop("config", None)
-    return MetricsResponse(methods=methods, same_subset=same, service_latency=lat)
+    extra = {}
+    for key, fname in (("service_latency", "service_latency.json"), ("gate", "gate_metrics.json")):
+        d = _read(results_dir / fname)
+        if d:
+            d.pop("config", None)
+        extra[key] = d
+    return MetricsResponse(methods=methods, same_subset=same, **extra)

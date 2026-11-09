@@ -6,8 +6,16 @@ import pandas as pd
 import pytest
 
 from t2a.signals.budget import BudgetExceeded, Ledger, check_budget
-from t2a.signals.llm import (Prices, ResponseCache, build_system, cache_key, parse_message,
-                             records_to_frame, request_params, validate)
+from t2a.signals.llm import (
+    Prices,
+    ResponseCache,
+    build_system,
+    cache_key,
+    parse_message,
+    records_to_frame,
+    request_params,
+    validate,
+)
 from t2a.signals.sampling import select_fewshot_examples
 
 GOOD = {"rationale": "Beat on revenue.", "event_type": "earnings", "direction": "positive",
@@ -98,7 +106,8 @@ def test_budget_gates(tmp_path):
 def _train(split="train"):
     rows = []
     for i in range(40):
-        rows.append({"news_id": f"n{i}", "ticker": "AAPL", "trade_date": pd.Timestamp("2020-01-01") + pd.Timedelta(days=i),
+        rows.append({"news_id": f"n{i}", "ticker": "AAPL",
+                     "trade_date": pd.Timestamp("2020-01-01") + pd.Timedelta(days=i),
                      "title": f"t{i}", "body": "x" * 300, "label": [1, -1, 0][i % 3], "split": split})
     return pd.DataFrame(rows)
 

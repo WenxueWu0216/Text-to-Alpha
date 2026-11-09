@@ -15,6 +15,7 @@ class FakeScorer:
     Score depends on the text (keyword + length), so a reordering bug would show up.
     """
     name = "fake-finbert"
+    variant = "fake"
     device = "cpu"
 
     def __init__(self):

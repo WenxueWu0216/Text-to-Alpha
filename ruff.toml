@@ -1,0 +1,18 @@
+line-length = 120
+target-version = "py311"
+extend-exclude = ["data", "models", "results"]
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+# B905: existing zips pair columns of the same frame; adding strict= is churn, not a fix.
+ignore = ["E731", "B905"]
+
+[lint.per-file-ignores]
+# scripts put src/ on sys.path before importing the package
+"scripts/*" = ["E402"]
+"service/scripts/*" = ["E402"]
+"service/tests/*" = ["E402"]
+"scripts/05_data_quality.py" = ["E501"]   # markdown report template
+
+[lint.isort]
+known-first-party = ["t2a", "app", "eval_gate", "export_onnx"]

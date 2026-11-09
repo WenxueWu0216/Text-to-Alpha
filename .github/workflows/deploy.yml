@@ -1,0 +1,113 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write   # OIDC token for Workload Identity Federation (no JSON keys)
+
+concurrency:
+  group: deploy-cloud-run
+  cancel-in-progress: false
+
+env:
+  IMAGE: ${{ vars.GCP_REGION }}-docker.pkg.dev/${{ vars.GCP_PROJECT_ID }}/${{ vars.GAR_REPO }}/${{ vars.CLOUD_RUN_SERVICE }}:${{ github.sha }}
+  SERVICE: ${{ vars.CLOUD_RUN_SERVICE }}
+  REGION: ${{ vars.GCP_REGION }}
+  PROJECT: ${{ vars.GCP_PROJECT_ID }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements-ci.txt
+            service/requirements.txt
+      - run: pip install -r requirements-ci.txt
+
+      # ---- 1. build + eval gate on the runner (nothing leaves the runner if this fails) ----
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: service/Dockerfile
+          platforms: linux/amd64
+          tags: ${{ env.IMAGE }}
+          load: true
+          cache-from: type=gha,scope=t2a-service
+          cache-to: type=gha,mode=max,scope=t2a-service
+      - name: Container cold start on the runner + eval gate
+        run: |
+          mkdir -p out
+          docker image inspect "$IMAGE" --format '{{.Size}}' > out/image_bytes.txt
+          start=$(date +%s.%N)
+          docker run -d --name svc -p 8080:8080 "$IMAGE"
+          until curl -sf localhost:8080/health > /dev/null; do sleep 0.1; done
+          echo "{\"runner_container_cold_start_s\": $(echo "$(date +%s.%N) - $start" | bc)}" > out/runner_cold_start.json
+          cat out/runner_cold_start.json
+          python scripts/eval_gate.py --url http://127.0.0.1:8080 --out out/gate_metrics_runner.json
+          docker rm -f svc
+
+      # ---- 2. push + deploy a candidate revision with NO traffic ----------------------
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - run: gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
+      - run: docker push "$IMAGE"
+      - name: Deploy candidate (0% traffic)
+        run: |
+          gcloud run deploy "$SERVICE" --project "$PROJECT" --region "$REGION" --image "$IMAGE" \
+            --service-account "${{ vars.GCP_RUNTIME_SA }}" \
+            --cpu 1 --memory 1Gi --concurrency 8 --timeout 30 --min-instances 0 --max-instances 2 \
+            --port 8080 --set-env-vars T2A_NUM_THREADS=1 --cpu-throttling --no-cpu-boost \
+            --no-traffic --tag candidate --quiet
+          url=$(gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format json \
+                | python -c "import json,sys; t=json.load(sys.stdin)['status']['traffic']; print(next(x['url'] for x in t if x.get('tag')=='candidate'))")
+          echo "CANDIDATE_URL=$url" >> "$GITHUB_ENV"
+          echo "candidate: $url"
+
+      # ---- 3. gate the candidate on Cloud Run's own CPUs, then promote -----------------
+      - name: First request to the candidate (cold start, if the instance is cold)
+        run: python service/scripts/bench_latency.py --url "$CANDIDATE_URL" --label cloud-run-candidate --cold-start --n 0 --warmup 0 --out out/candidate_cold_start.json
+      - name: Poll /health
+        run: |
+          for i in $(seq 1 60); do curl -sf "$CANDIDATE_URL/health" && echo && exit 0; sleep 2; done
+          exit 1
+      - name: Eval gate on Cloud Run
+        run: python scripts/eval_gate.py --url "$CANDIDATE_URL" --out out/gate_metrics_cloud_run.json
+      - name: Promote candidate to 100% traffic
+        run: |
+          gcloud run services update-traffic "$SERVICE" --project "$PROJECT" --region "$REGION" --to-latest --quiet
+          url=$(gcloud run services describe "$SERVICE" --project "$PROJECT" --region "$REGION" --format 'value(status.url)')
+          echo "SERVICE_URL=$url" >> "$GITHUB_ENV"
+          echo "### Live: $url" >> "$GITHUB_STEP_SUMMARY"
+
+      # ---- 4. latency against the live URL (results are uploaded, never committed) ----
+      - name: Latency (n=200; 1 and 32 headlines)
+        run: python service/scripts/bench_latency.py --url "$SERVICE_URL" --label cloud-run --n 200 --out out/service_latency.json
+      - name: Summary
+        if: always()
+        run: |
+          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json, pathlib
+          o = pathlib.Path("out")
+          for f in sorted(o.glob("*.json")):
+              print(f"<details><summary>{f.name}</summary>\n\n```json\n{f.read_text()[:6000]}\n```\n</details>\n")
+          PY
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: deploy-results-${{ github.sha }}
+          path: out/
+          if-no-files-found: ignore

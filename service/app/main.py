@@ -5,16 +5,16 @@
 from __future__ import annotations
 
 import os
+import time
+from collections.abc import Callable
 from contextlib import asynccontextmanager
 from pathlib import Path
-from typing import Callable
 
 from fastapi import FastAPI, Request
 
 from .benchmarks import load_metrics
 from .model import Scorer, load_finbert
-from .schemas import (HeadlineScore, HealthResponse, LabelProbabilities, MetricsResponse, ScoreRequest,
-                      ScoreResponse)
+from .schemas import HeadlineScore, HealthResponse, LabelProbabilities, MetricsResponse, ScoreRequest, ScoreResponse
 
 DEFAULT_RESULTS_DIR = Path(__file__).resolve().parents[2] / "results"
 
@@ -24,7 +24,10 @@ def create_app(load_scorer: Callable[[], Scorer] = load_finbert, results_dir: Pa
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
+        t0 = time.monotonic()
         app.state.scorer = load_scorer()  # once per process, before the first request
+        app.state.model_load_s = time.monotonic() - t0
+        app.state.started = t0
         app.state.metrics = load_metrics(results_dir)  # results are baked in; read once
         yield
 
@@ -33,7 +36,10 @@ def create_app(load_scorer: Callable[[], Scorer] = load_finbert, results_dir: Pa
     @app.get("/health", response_model=HealthResponse)
     def health(request: Request) -> HealthResponse:
         s = request.app.state.scorer
-        return HealthResponse(status="ok", model=s.name, device=s.device)
+        st = request.app.state
+        return HealthResponse(status="ok", model=s.name, variant=getattr(s, "variant", "unknown"), device=s.device,
+                              uptime_s=round(time.monotonic() - st.started, 3),
+                              model_load_s=round(st.model_load_s, 3))
 
     @app.get("/metrics", response_model=MetricsResponse)
     def metrics(request: Request) -> MetricsResponse:

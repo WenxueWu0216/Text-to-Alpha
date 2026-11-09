@@ -1,0 +1,28 @@
+{
+  "served_model": "model.fp16w.onnx (fp16-stored weights, fp32 compute)",
+  "reference_ic": -0.02882,
+  "ic_margin": 0.002,
+  "min_ic": -0.03082,
+  "reference_scores": "reference_scores_fp32.parquet",
+  "min_score_spearman": 0.999,
+  "max_mean_abs_score_diff": 0.005,
+  "measured": {
+    "fp32_onnx_ic": -0.02901,
+    "fp16w_ic": -0.02882,
+    "fp16w_minus_fp32_ic": 0.00019,
+    "fp16w_vs_fp32_score_spearman": 0.999999,
+    "fp16w_vs_fp32_mean_abs_score_diff": 0.000081,
+    "fp32_onnx_vs_torch_max_abs_score_diff": 7.8e-06,
+    "inference": "length-sorted micro-batches of 8",
+    "measured_on": "Apple M4, onnxruntime 1.31.1; the fp16w IC was identical on x86 AMD EPYC 7763 in the sweep"
+  },
+  "rejected_int8_dynamic_per_channel": {
+    "spearman_vs_fp32": {"apple_m4": 0.9961, "x86_epyc_9v74_avx512_vnni": 0.9277, "x86_epyc_7763_avx2_no_vnni": 0.1463},
+    "ic_minus_fp32": {"apple_m4": 0.00154, "x86_epyc_9v74_avx512_vnni": 0.00730, "x86_epyc_7763_avx2_no_vnni": 0.00531}
+  },
+  "rationale": [
+    "reference_ic = fixture IC of the served model when the gate was set.",
+    "The served model computes in fp32, which gave the same scores on every CPU we measured (Apple M4 and two x86 EPYCs). So with the fixture frozen, IC can only move if the model or the pipeline changes. The margin, 0.002, equals the tolerance allowed for compressing the model: a future compression step within that budget passes, anything larger fails.",
+    "One standard error of a 58-day mean IC is about 0.026, so the IC check alone cannot catch small regressions, and with a negative reference IC it cannot catch a sign flip. The agreement check against the frozen fp32 scores catches label-order, tokenizer and compression regressions. Measured mean abs diff is 0.00008; the 0.005 limit rejects every int8 variant we tried (best: 0.017 on ARM, 0.13 on x86)."
+  ]
+}

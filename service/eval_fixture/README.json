@@ -1,0 +1,19 @@
+{
+  "seed": 20261105,
+  "split": "val",
+  "rule": "1 random article per stock-day, all names on 58 randomly sampled val days",
+  "n_rows": 1508,
+  "n_days": 58,
+  "bytes": 90547,
+  "columns": [
+    "news_id",
+    "trade_date",
+    "ticker",
+    "title",
+    "fwd_ret",
+    "excess_ret",
+    "label",
+    "split"
+  ],
+  "source": "FNSPID (Dong et al., KDD 2024), CC BY-NC 4.0; returns from Yahoo Finance"
+}

@@ -50,8 +50,8 @@ def main():
                                       days=("trade_date", "nunique"),
                                       tickers=("ticker", "nunique")))
     per_day = events.groupby("trade_date")["ticker"].nunique()
-    print(f"names with news per day: median {per_day.median():.0f}, "
-          f"days with >= {cfg['eval']['min_names_per_day']}: {(per_day >= cfg['eval']['min_names_per_day']).mean():.1%}")
+    k = cfg["eval"]["min_names_per_day"]
+    print(f"names with news per day: median {per_day.median():.0f}, days with >= {k}: {(per_day >= k).mean():.1%}")
     print("label distribution:", events["label"].value_counts(normalize=True).round(3).to_dict())
 
 
