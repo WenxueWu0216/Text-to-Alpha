@@ -1,0 +1,245 @@
+{
+  "method": "service_latency",
+  "summary": {
+    "service": "Cloud Run us-central1, 1 vCPU, 1 GiB, 1 inference thread, concurrency 8, fp16w ONNX",
+    "cold_start_first_request_s": {
+      "median": 10.7275,
+      "min": 10.72,
+      "max": 10.735,
+      "instance_model_load_s": [
+        6.942,
+        6.886,
+        6.574
+      ],
+      "full_cold_start_runs": [
+        10.72,
+        10.735
+      ],
+      "excluded": "cloud-run-cold-1 (5.85 s): the instance was already up 1.45 s before the request was sent, so it paid only part of the startup",
+      "all_runs": [
+        5.846,
+        10.72,
+        10.735
+      ]
+    },
+    "warm": {
+      "batch_1": {
+        "p50_ms": 102.1,
+        "p95_ms": 125.2,
+        "n_requests": 200
+      },
+      "batch_32": {
+        "p50_ms": 1818.0,
+        "p95_ms": 2432.2,
+        "n_requests": 200
+      }
+    },
+    "warm_source": "https://github.com/WenxueWu0216/Text-to-Alpha/actions/runs/42714313022",
+    "notes": [
+      "Cold start = client-side latency of the first /score request to a scaled-to-zero service: instance start + model load + inference + network. Confirmed cold by instance uptime_s <= latency + 2 s.",
+      "The deploy runs' own first requests hit instances Cloud Run had already started for the candidate revision, so they are recorded as warm (was_cold_start false) and are not used as cold starts.",
+      "Warm runs: 200 sequential requests per batch size from a GitHub runner. Run 42711239979 measured p50 89.3/1644.0 ms and p95 114.7/2320.6 ms for 1/32 headlines."
+    ]
+  },
+  "measurements": {
+    "cloud-run": {
+      "label": "cloud-run",
+      "url": "https://t2a-service-g4tojk7pla-uc.a.run.app",
+      "created_utc": "2026-11-09T22:53:14+00:00",
+      "git_commit": "cfb3f9316854d0eddad3cf5f05d892e15cf962dc",
+      "model": "ProsusAI/finbert",
+      "variant": "fp16w",
+      "device": "cpu",
+      "client": {
+        "os": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+        "python": "3.12.16",
+        "runner": "GitHub Actions 1000000189"
+      },
+      "method": "client-side HTTP round trip, sequential requests, fixture headlines, max_length 64",
+      "cold_start": null,
+      "runs": [
+        {
+          "batch_size": 1,
+          "n_requests": 200,
+          "warmup_requests": 10,
+          "p50_ms": 102.080861999994,
+          "p95_ms": 125.19949394998946,
+          "mean_ms": 103.78274173500074,
+          "max_ms": 206.68166300004032,
+          "ms_per_headline_p50": 102.080861999994
+        },
+        {
+          "batch_size": 32,
+          "n_requests": 200,
+          "warmup_requests": 10,
+          "p50_ms": 1817.9508860000055,
+          "p95_ms": 2432.212640000037,
+          "mean_ms": 1794.7045464950002,
+          "max_ms": 2647.8851440000426,
+          "ms_per_headline_p50": 56.81096518750017
+        }
+      ],
+      "deploy_run": "https://github.com/WenxueWu0216/Text-to-Alpha/actions/runs/42714313022"
+    },
+    "cloud-run-run42711239979": {
+      "label": "cloud-run",
+      "url": "https://t2a-service-g4tojk7pla-uc.a.run.app",
+      "created_utc": "2026-11-09T22:36:16+00:00",
+      "git_commit": "c077621b4d03f7d8af996fd61c2a056e4a83a19c",
+      "model": "ProsusAI/finbert",
+      "variant": "fp16w",
+      "device": "cpu",
+      "client": {
+        "os": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+        "python": "3.12.16",
+        "runner": "GitHub Actions 1000000183"
+      },
+      "method": "client-side HTTP round trip, sequential requests, fixture headlines, max_length 64",
+      "cold_start": null,
+      "runs": [
+        {
+          "batch_size": 1,
+          "n_requests": 200,
+          "warmup_requests": 10,
+          "p50_ms": 89.33487399997375,
+          "p95_ms": 114.66427725005698,
+          "mean_ms": 92.2204294300019,
+          "max_ms": 196.91676599995844,
+          "ms_per_headline_p50": 89.33487399997375
+        },
+        {
+          "batch_size": 32,
+          "n_requests": 200,
+          "warmup_requests": 10,
+          "p50_ms": 1643.9764085000093,
+          "p95_ms": 2320.605497049979,
+          "mean_ms": 1641.2630886500012,
+          "max_ms": 2611.4138929999626,
+          "ms_per_headline_p50": 51.37426276562529
+        }
+      ],
+      "deploy_run": "https://github.com/WenxueWu0216/Text-to-Alpha/actions/runs/42711239979"
+    },
+    "cloud-run-candidate": {
+      "label": "cloud-run-candidate",
+      "url": "https://candidate---t2a-service-g4tojk7pla-uc.a.run.app",
+      "created_utc": "2026-11-09T22:45:03+00:00",
+      "git_commit": "cfb3f9316854d0eddad3cf5f05d892e15cf962dc",
+      "model": "ProsusAI/finbert",
+      "variant": "fp16w",
+      "device": "cpu",
+      "client": {
+        "os": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+        "python": "3.12.16",
+        "runner": "GitHub Actions 1000000189"
+      },
+      "method": "client-side HTTP round trip, sequential requests, fixture headlines, max_length 64",
+      "cold_start": {
+        "first_request_latency_s": 0.361,
+        "instance_uptime_after_s": 11.621,
+        "instance_model_load_s": 7.107,
+        "was_cold_start": false
+      },
+      "runs": [],
+      "deploy_run": "https://github.com/WenxueWu0216/Text-to-Alpha/actions/runs/42714313022"
+    },
+    "cloud-run-candidate-run42711239979": {
+      "label": "cloud-run-candidate",
+      "url": "https://candidate---t2a-service-g4tojk7pla-uc.a.run.app",
+      "created_utc": "2026-11-09T22:28:45+00:00",
+      "git_commit": "c077621b4d03f7d8af996fd61c2a056e4a83a19c",
+      "model": "ProsusAI/finbert",
+      "variant": "fp16w",
+      "device": "cpu",
+      "client": {
+        "os": "Linux-7.0.0-1017-azure-x86_64-with-glibc2.39",
+        "python": "3.12.16",
+        "runner": "GitHub Actions 1000000183"
+      },
+      "method": "client-side HTTP round trip, sequential requests, fixture headlines, max_length 64",
+      "cold_start": {
+        "first_request_latency_s": 0.401,
+        "instance_uptime_after_s": 10.829,
+        "instance_model_load_s": 6.324,
+        "was_cold_start": false
+      },
+      "runs": [],
+      "deploy_run": "https://github.com/WenxueWu0216/Text-to-Alpha/actions/runs/42711239979"
+    },
+    "cloud-run-cold-1": {
+      "label": "cloud-run-cold-1",
+      "url": "https://t2a-service-g4tojk7pla-uc.a.run.app",
+      "created_utc": "2026-11-09T23:33:42+00:00",
+      "git_commit": "cfb3f9316854d0eddad3cf5f05d892e15cf962dc",
+      "model": "ProsusAI/finbert",
+      "variant": "fp16w",
+      "device": "cpu",
+      "client": {
+        "os": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+        "python": "3.14.2",
+        "runner": null
+      },
+      "method": "client-side HTTP round trip, sequential requests, fixture headlines, max_length 64; one request after >= 20 min idle, sent from a Mac (Wi-Fi) to the scaled-to-zero service",
+      "cold_start": {
+        "first_request_latency_s": 5.846,
+        "instance_uptime_after_s": 7.272,
+        "instance_model_load_s": 6.942,
+        "was_cold_start": true,
+        "instance_started_before_request_s": 1.426,
+        "full_cold_start": false
+      },
+      "runs": [],
+      "revision": "t2a-service-00004-baw"
+    },
+    "cloud-run-cold-2": {
+      "label": "cloud-run-cold-2",
+      "url": "https://t2a-service-g4tojk7pla-uc.a.run.app",
+      "created_utc": "2026-11-10T00:35:13+00:00",
+      "git_commit": "cfb3f9316854d0eddad3cf5f05d892e15cf962dc",
+      "model": "ProsusAI/finbert",
+      "variant": "fp16w",
+      "device": "cpu",
+      "client": {
+        "os": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+        "python": "3.14.2",
+        "runner": null
+      },
+      "method": "client-side HTTP round trip, sequential requests, fixture headlines, max_length 64; one request after >= 20 min idle, sent from a Mac (Wi-Fi) to the scaled-to-zero service",
+      "cold_start": {
+        "first_request_latency_s": 10.72,
+        "instance_uptime_after_s": 7.26,
+        "instance_model_load_s": 6.886,
+        "was_cold_start": true,
+        "instance_started_before_request_s": 0.0,
+        "full_cold_start": true
+      },
+      "runs": [],
+      "revision": "t2a-service-00004-baw"
+    },
+    "cloud-run-cold-3": {
+      "label": "cloud-run-cold-3",
+      "url": "https://t2a-service-g4tojk7pla-uc.a.run.app",
+      "created_utc": "2026-11-10T00:55:25+00:00",
+      "git_commit": "cfb3f9316854d0eddad3cf5f05d892e15cf962dc",
+      "model": "ProsusAI/finbert",
+      "variant": "fp16w",
+      "device": "cpu",
+      "client": {
+        "os": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+        "python": "3.14.2",
+        "runner": null
+      },
+      "method": "client-side HTTP round trip, sequential requests, fixture headlines, max_length 64; one request after >= 20 min idle, sent from a Mac (Wi-Fi) to the scaled-to-zero service",
+      "cold_start": {
+        "first_request_latency_s": 10.735,
+        "instance_uptime_after_s": 6.91,
+        "instance_model_load_s": 6.574,
+        "was_cold_start": true,
+        "instance_started_before_request_s": 0.0,
+        "full_cold_start": true
+      },
+      "runs": [],
+      "revision": "t2a-service-00004-baw"
+    }
+  }
+}
