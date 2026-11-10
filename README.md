@@ -77,10 +77,11 @@ curl -s https://t2a-service-348925486034.us-central1.run.app/score \
   |---|---:|---:|
   | 1 headline | 89 ms | 115 ms |
   | 32 headlines | 1,644 ms | 2,321 ms |
-  | Cold start (first request to a scaled-to-zero instance) | pending | |
+  | Cold start (first request to a scaled-to-zero service) | 10.7 s | |
 
-  The deploy run's first request went to an instance Cloud Run had already started, so it doesn't
-  measure a cold start. Loading the model took 6.3 s on that instance.
+  Cold start: 2 full cold starts after 20+ minutes idle (10.72 s and 10.74 s), sent from a laptop.
+  About 6.6 to 6.9 s of that is loading the model on the instance. All numbers are in
+  [`results/service_latency.json`](results/service_latency.json).
 
 ## Deployment pipeline
 
